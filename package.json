@@ -1,1 +1,29 @@
-{"name":"fc2s-js","version":"1.0.0","type":"module","private":true,"scripts":{"lint":"oxlint . --ignore-pattern node_modules","lint:fix":"oxlint . --fix --ignore-pattern node_modules","test":"node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand","test:debug":"node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --detectOpenHandles"},"dependencies":{"adm-zip":"^0.5.16","csv-parse":"^6.1.0","dotenv":"^17.0.0","mysql2":"^3.14.0"},"devDependencies":{"jest":"^30.0.0","oxlint":"^1.0.0"}}
+{
+  "name": "fc2s",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "latest": "node examples/get_latest.mjs",
+    "lint": "oxlint . --ignore-pattern node_modules",
+    "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --coverage --detectOpenHandles --silent --runInBand"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "csv-parse": "^6.1.0",
+    "dotenv": "^17.0.0",
+    "mysql2": "^3.14.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "oxlint": "^1.76.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [],
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)",
+      "**/?(*.)+(spec|test).mjs",
+      "**/?(*.)+(spec|test).cjs"
+    ]
+  }
+}

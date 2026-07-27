@@ -1,29 +1,51 @@
 import mysql from 'mysql2/promise';
-import { spawn } from 'node:child_process';
-import { createReadStream, createWriteStream } from 'node:fs';
-import { pipeline } from 'node:stream/promises';
+import { spawn as defaultSpawn } from 'node:child_process';
+import { createReadStream as defaultCreateReadStream, createWriteStream as defaultCreateWriteStream } from 'node:fs';
+import { pipeline as defaultPipeline } from 'node:stream/promises';
 
-export function db(c) {
-  return mysql.createConnection({ host: c.host, port: c.port, user: c.user, password: c.password, multipleStatements: true, infileStreamFactory: file => createReadStream(file) });
-}
-
-export function run(cmd, args, opts = {}) {
-  return new Promise((res, rej) => {
-    const p = spawn(cmd, args, opts); let out = '', err = '';
-    p.stdout?.on('data', x => out += x);
-    p.stderr?.on('data', x => err += x);
-    p.on('error', rej);
-    p.on('close', n => n ? rej(new Error(err || `command failed: ${n}`)) : res(out));
+export function db(config, deps = {}) {
+  const client = deps.mysql ?? mysql;
+  const createReadStream = deps.createReadStream ?? defaultCreateReadStream;
+  return client.createConnection({
+    host: config.host, port: config.port, user: config.user, password: config.password,
+    multipleStatements: true,
+    infileStreamFactory: (file) => createReadStream(file),
   });
 }
 
-export async function dumpTable(c, dbName, table, file) {
-  const p = spawn('mysqldump', ['--single-transaction', '--skip-comments', '--host', c.host, '--port', String(c.port), '--user', c.user, `--password=${c.password}`, dbName, table], { stdio: ['ignore', 'pipe', 'pipe'] });
-  let err = '';
-  p.stderr.on('data', x => err += x);
+export function run(command, args, options = {}, deps = {}) {
+  const spawn = deps.spawn ?? defaultSpawn;
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, options);
+    let output = '';
+    let errorOutput = '';
+    child.stdout?.on('data', (chunk) => { output += chunk; });
+    child.stderr?.on('data', (chunk) => { errorOutput += chunk; });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code) reject(new Error(errorOutput || `command failed: ${code}`));
+      else resolve(output);
+    });
+  });
+}
+
+export async function dumpTable(config, database, table, file, deps = {}) {
+  const spawn = deps.spawn ?? defaultSpawn;
+  const pipeline = deps.pipeline ?? defaultPipeline;
+  const createWriteStream = deps.createWriteStream ?? defaultCreateWriteStream;
+  const child = spawn('mysqldump', [
+    '--single-transaction', '--skip-comments', '--host', config.host,
+    '--port', String(config.port), '--user', config.user,
+    `--password=${config.password}`, database, table,
+  ], { stdio: ['ignore', 'pipe', 'pipe'] });
+  let errorOutput = '';
+  child.stderr.on('data', (chunk) => { errorOutput += chunk; });
   const exited = new Promise((resolve, reject) => {
-    p.on('error', reject);
-    p.on('close', code => code ? reject(new Error(err || `mysqldump failed: ${code}`)) : resolve());
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code) reject(new Error(errorOutput || `mysqldump failed: ${code}`));
+      else resolve();
+    });
   });
-  await Promise.all([exited, pipeline(p.stdout, createWriteStream(file))]);
+  await Promise.all([exited, pipeline(child.stdout, createWriteStream(file))]);
 }
