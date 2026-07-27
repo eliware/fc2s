@@ -1,6 +1,6 @@
 {
     "name": "@eliware/fc2s",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "module",
     "scripts": {
         "latest": "node examples/get_latest.mjs",
@@ -8,8 +8,8 @@
         "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --coverage --detectOpenHandles --silent --runInBand"
     },
     "dependencies": {
-        "adm-zip": "^0.5.16",
-        "csv-parse": "^6.1.0",
+        "adm-zip": "^0.6.0",
+        "csv-parse": "^7.0.1",
         "dotenv": "^17.0.0",
         "mysql2": "^3.14.0"
     },
@@ -25,5 +25,14 @@
             "**/?(*.)+(spec|test).mjs",
             "**/?(*.)+(spec|test).cjs"
         ]
-    }
+    },
+    "author": "Eli Sterling <eli@eliware.org>",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/eliware/fc2s.git"
+    },
+    "bugs": {
+        "url": "https://github.com/eliware/fc2s/issues"
+    },
+    "homepage": "https://github.com/eliware/fc2s#readme"
 }
