@@ -1,6 +1,6 @@
 {
-    "name": "fc2s",
-    "version": "1.0.1",
+    "name": "@eliware/fc2s",
+    "version": "1.0.2",
     "type": "module",
     "scripts": {
         "latest": "node examples/get_latest.mjs",
