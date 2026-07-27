@@ -1,0 +1,5 @@
+export const HOME_PAGE='https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/';
+export const DATA_FILE='https://nfdc.faa.gov/webContent/28DaySub/extra/d_M_Y_CSV.zip';
+export function parseDates(html) { const out=[]; for (const m of html.matchAll(/\b([A-Z][a-z]+ \d{1,2}, \d{4})\b/g)) { const d=new Date(m[1]); if (!Number.isNaN(d.valueOf())) out.push(d.toISOString().slice(0,10)); } return [...new Set(out)].sort((a,b)=>b.localeCompare(a)); }
+export function dataUrl(date) { const d=new Date(`${date}T00:00:00Z`); if(Number.isNaN(d.valueOf())) throw new Error('Invalid date'); const x=new Intl.DateTimeFormat('en-US',{timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'}).formatToParts(d); const p=Object.fromEntries(x.map(v=>[v.type,v.value])); return DATA_FILE.replace('d_M_Y',`${p.day}_${p.month}_${p.year}`); }
+export async function availableDates(url=HOME_PAGE) { const r=await fetch(url); if(!r.ok) throw new Error(`FAA HTTP ${r.status}`); return parseDates(await r.text()); }
