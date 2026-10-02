@@ -34,5 +34,20 @@
     "bugs": {
         "url": "https://github.com/eliware/fc2s/issues"
     },
-    "homepage": "https://github.com/eliware/fc2s#readme"
+    "homepage": "https://github.com/eliware/fc2s#readme",
+    "prettier": {
+      "printWidth": 100,
+      "tabWidth": 2,
+      "useTabs": false,
+      "semi": true,
+      "singleQuote": false,
+      "quoteProps": "as-needed",
+      "jsxSingleQuote": false,
+      "trailingComma": "all",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "arrowParens": "always",
+      "proseWrap": "preserve",
+      "endOfLine": "lf"
+    }
 }
