@@ -1,6 +1,19 @@
 {
     "name": "@eliware/fc2s",
     "version": "1.0.4",
+    "description": "Node.js ESM tool that imports FAA NASR CSV data into MySQL and exports each database table as a gzip tar archive.",
+    "keywords": [
+        "faa",
+        "nasr",
+        "aviation",
+        "csv",
+        "mysql",
+        "data-import",
+        "tar",
+        "gzip",
+        "nodejs",
+        "esm"
+    ],
     "type": "module",
     "scripts": {
         "latest": "node examples/get_latest.mjs",
@@ -49,5 +62,8 @@
       "arrowParens": "always",
       "proseWrap": "preserve",
       "endOfLine": "lf"
+    },
+    "eliware": {
+      "apply": ["general", "application"]
     }
 }
