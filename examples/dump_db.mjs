@@ -11,7 +11,7 @@ if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
 } else {
   const c = config();
   const dumpDir = path.resolve(c.exportDir, dbName);
-  const archive = path.resolve(c.exportDir, `${dbName}.tar.gz`);
+  const archive = path.resolve(c.exportDir, `${dbName}.sql.tar.gz`);
   let archived = false;
 
   try {

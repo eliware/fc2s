@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { gunzipSync } from 'node:zlib';
 import { tarGz } from '../src/archive.mjs';
+import { gzipFile } from '../src/archive.mjs';
 
 test('tarGz creates archive with top-level directory', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'fc2s-test-'));
@@ -12,6 +14,21 @@ test('tarGz creates archive with top-level directory', async () => {
   await tarGz(archive, dir);
   expect((await fs.stat(archive)).size).toBeGreaterThan(0);
   await fs.rm(root, { recursive: true, force: true });
+});
+
+test('gzipFile compresses one file and removes partial output after failure', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'fc2s-gzip-'));
+  const input = path.join(root, 'database.sqlite');
+  const output = path.join(root, 'database.sqlite.gz');
+  await fs.writeFile(input, 'sqlite database bytes');
+  try {
+    await gzipFile(input, output);
+    expect(gunzipSync(await fs.readFile(output)).toString()).toBe('sqlite database bytes');
+    await expect(gzipFile(path.join(root, 'missing.sqlite'), output)).rejects.toThrow('gzip failed');
+    await expect(fs.stat(output)).rejects.toThrow();
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
 });
 
 test('tarGz rejects when tar cannot archive missing directory', async () => {

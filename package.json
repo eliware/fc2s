@@ -2,6 +2,9 @@
     "name": "@eliware/fc2s",
     "version": "1.0.4",
     "type": "module",
+    "engines": {
+        "node": ">=24.15.0"
+    },
     "scripts": {
         "latest": "node examples/get_latest.mjs",
         "lint": "oxlint . --ignore-pattern node_modules",

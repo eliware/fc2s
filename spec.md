@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Create an ESM-only Node.js project that downloads FAA NASR aeronautical data, imports each dataset into MySQL, exports every database table into a separate SQL file, and packages those files as a gzip-compressed tar archive.
+Create an ESM-only Node.js project that downloads FAA NASR aeronautical data and imports each dataset using either MySQL or SQLite. MySQL exports one SQL file per table in a gzip-compressed tar archive. SQLite exports one gzip-compressed database file.
 
 The project must use `.mjs` files exclusively for application code and examples. Source code belongs in `src/`; executable entry points belong in `examples/`.
 
@@ -18,7 +18,7 @@ Do not use CommonJS, `require`, `.cjs`, or `.js` application files. Use `import`
 
 ## Runtime requirements
 
-Require a current Node.js release with native ESM support. Use `dotenv` to load configuration from a project-root `.env` file. The `.env` file must define:
+Require Node.js 24.15 or newer with native ESM support. Use `dotenv` to load configuration from a project-root `.env` file. When `DB_DRIVER=mysql`, the file must define:
 
 - `MYSQL_HOSTNAME`
 - `MYSQL_USERNAME`
@@ -26,7 +26,9 @@ Require a current Node.js release with native ESM support. Use `dotenv` to load 
 
 Never commit `.env`; provide `.env.example` documenting the required variables. These values must be loaded before database configuration is validated.
 
-Also require these system capabilities:
+MySQL credentials are required only when `DB_DRIVER=mysql`. The SQLite backend uses Node's built-in `node:sqlite` module and requires Node.js 24.15 or newer.
+
+The MySQL backend also requires these system capabilities:
 
 - MySQL-compatible server
 - `mysql` client or equivalent SQL execution capability
@@ -50,34 +52,33 @@ For a requested dataset date:
 6. Validate the HTTP response and downloaded file before processing.
 7. Extract the ZIP safely, rejecting archive path traversal.
 8. Locate FAA schema CSV files and table CSV files.
-9. Generate MySQL CREATE TABLE and bulk-load statements from the FAA schema.
-10. Create or replace a database named `<prefix><YYYY-MM-DD>`.
-11. Create/update an index database and index table recording dataset name, import time, and preview status.
-12. Execute schema and import statements with local infile enabled.
-13. Create a temporary dump subdirectory named for the database, for example:
+9. Parse table and column definitions from the FAA schema.
+10. For MySQL, generate MySQL CREATE TABLE and bulk-load statements, create or replace a database named `<prefix><YYYY-MM-DD>`, and execute statements with local infile enabled.
+11. For SQLite, create a local database named `<db_name>.sqlite`, create the schema, and insert CSV rows with prepared statements in a transaction. Store FAA values as text to preserve their source representation.
+12. Create/update an index database and index table recording dataset name, import time, and preview status for the selected backend where applicable.
+13. Create a temporary output subdirectory named for the database, for example:
     `exports/<db_name>/`
-14. Dump every table in the database into its own file:
+14. For MySQL, dump every table in the database into its own file:
     `exports/<db_name>/<table_name>.sql`
     Each file must contain a valid standalone SQL dump for that table, including table creation and table data where supported.
-15. Create:
-    `exports/<db_name>.tar.gz`
-    containing the per-table SQL files, with stable archive-relative names and no unwanted absolute paths.
-16. After successful tarball creation, delete the dump subdirectory and all individual `.sql` files.
+15. Create a MySQL archive named `exports/<db_name>.sql.tar.gz` containing the per-table SQL files, with stable archive-relative names and no unwanted absolute paths. For SQLite, gzip the database file to `exports/<db_name>.sqlite.gz`.
+16. After successful archive/compression and validation, delete the temporary output subdirectory.
 17. Always remove the download ZIP, extracted dataset, generated temporary files, and other process-owned temporary paths, including after failures where practical.
 18. Return a success/failure result and useful error details without swallowing the original failure.
 
 ## Dumping and archive behavior
 
-The tarball is the final artifact. It must be named exactly `<db_name>.tar.gz` and contain one SQL file per database table. Do not create one combined SQL dump.
+The backend determines the final artifact. MySQL creates `<db_name>.sql.tar.gz` containing one SQL file per table; do not create one combined SQL dump. SQLite creates `<db_name>.sqlite.gz`, which decompresses to a single standalone SQLite database file.
 
 Use safe child-process APIs rather than shell-string concatenation. Validate database and table identifiers before using them in commands. Avoid putting passwords directly in command-line arguments; prefer a temporary protected MySQL option file or supported environment mechanism, and remove it during cleanup.
 
-Only remove generated SQL files and the dump subdirectory after the tar command succeeds and the archive exists with a nonzero size. If archiving fails, preserve the dump directory for diagnosis unless configuration explicitly requests aggressive cleanup.
+Only remove the temporary output subdirectory after the selected archive or compression command succeeds and the output exists with a nonzero size. If archiving or compression fails, preserve the subdirectory for diagnosis unless configuration explicitly requests aggressive cleanup.
 
 ## Configuration
 
 Support configuration equivalent to:
 
+- `driver` (`mysql` or `sqlite`, default `mysql`, from `DB_DRIVER`)
 - `host` (loaded from `MYSQL_HOSTNAME`)
 - `port`
 - `user` (loaded from `MYSQL_USERNAME`)
@@ -86,7 +87,7 @@ Support configuration equivalent to:
 - `exportDir`
 - optional FAA URL, temporary directory, and cleanup controls
 
-The `.env` configuration and required variable names must be documented in the README and examples. Validate all required values before connecting.
+MySQL values are required and validated only when the selected driver is `mysql`. The `.env` configuration and required variable names must be documented in the README and examples.
 
 ## Modules
 
@@ -96,8 +97,9 @@ Suggested modules:
 - `src/https.mjs`: HTTPS requests and streaming downloads
 - `src/schema.mjs`: schema CSV parsing and SQL generation
 - `src/mysql.mjs`: connection, database/table operations, statement execution
+- `src/sqlite.mjs`: SQLite schema creation and transactional CSV import
 - `src/dump.mjs`: table discovery and per-table SQL dumping
-- `src/archive.mjs`: tar.gz creation
+- `src/archive.mjs`: tar.gz creation and SQLite gzip compression
 - `src/files.mjs`: temporary directories, safe extraction, recursive cleanup
 - `src/process.mjs`: orchestration and public latest/current/all operations
 - `src/errors.mjs`: typed application errors
