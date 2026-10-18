@@ -31,3 +31,15 @@ test('config applies optional defaults', () => {
   expect(config({ host: 'h', user: 'u', password: 'p' })).toMatchObject({ port: 3306, prefix: 'NASR_', exportDir: './exports' });
   process.env = saved;
 });
+
+test('SQLite config does not require MySQL credentials', () => {
+  const saved = { ...process.env };
+  for (const key of ['MYSQL_HOSTNAME', 'MYSQL_USERNAME', 'MYSQL_PASSWORD']) delete process.env[key];
+  process.env.DB_DRIVER = 'sqlite';
+  expect(config()).toMatchObject({ driver: 'sqlite', prefix: 'NASR_' });
+  process.env = saved;
+});
+
+test('config rejects unsupported database drivers', () => {
+  expect(() => config({ driver: 'postgres' })).toThrow('Unsupported database driver: postgres');
+});

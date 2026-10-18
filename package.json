@@ -15,20 +15,23 @@
         "esm"
     ],
     "type": "module",
+    "engines": {
+        "node": ">=26"
+    },
     "scripts": {
         "latest": "node examples/get_latest.mjs",
         "lint": "oxlint . --ignore-pattern node_modules",
         "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --coverage --detectOpenHandles --silent --runInBand"
     },
     "dependencies": {
-        "adm-zip": "^0.6.0",
-        "csv-parse": "^7.0.1",
-        "dotenv": "^17.0.0",
-        "mysql2": "^3.14.0"
+        "adm-zip": "^0.6.1",
+        "csv-parse": "^7.0.3",
+        "dotenv": "^18.0.7",
+        "mysql2": "^3.24.5"
     },
     "devDependencies": {
-        "jest": "^30.4.2",
-        "oxlint": "^1.76.0"
+        "jest": "^30.5.2",
+        "oxlint": "^1.87.0"
     },
     "jest": {
         "testEnvironment": "node",
@@ -49,22 +52,25 @@
     },
     "homepage": "https://github.com/eliware/fc2s#readme",
     "prettier": {
-      "printWidth": 100,
-      "tabWidth": 2,
-      "useTabs": false,
-      "semi": true,
-      "singleQuote": false,
-      "quoteProps": "as-needed",
-      "jsxSingleQuote": false,
-      "trailingComma": "all",
-      "bracketSpacing": true,
-      "bracketSameLine": false,
-      "arrowParens": "always",
-      "proseWrap": "preserve",
-      "endOfLine": "lf"
+        "printWidth": 100,
+        "tabWidth": 2,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": false,
+        "quoteProps": "as-needed",
+        "jsxSingleQuote": false,
+        "trailingComma": "all",
+        "bracketSpacing": true,
+        "bracketSameLine": false,
+        "arrowParens": "always",
+        "proseWrap": "preserve",
+        "endOfLine": "lf"
     },
     "eliware": {
-      "id": "E-8000",
-      "apply": ["general", "application"]
+        "id": "E-8000",
+        "apply": [
+            "general",
+            "application"
+        ]
     }
 }

@@ -66,9 +66,12 @@ export async function schema(dir) {
         return;
       }
       const csv = path.join(dir, name);
+      const tableColumns = columns;
       result.push({
         table,
-        sql: `CREATE TABLE ${identifier(table)} (${columns.join(', ')});\nLOAD DATA LOCAL INFILE ${JSON.stringify(csv)} INTO TABLE ${identifier(table)} FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\\r\\n' IGNORE 1 ROWS;`,
+        csv,
+        columns: tableColumns,
+        sql: `CREATE TABLE ${identifier(table)} (${tableColumns.map((column) => `${column.mysqlName} ${column.mysqlType}${column.nullable ? '' : ' NOT NULL'}`).join(', ')});\nLOAD DATA LOCAL INFILE ${JSON.stringify(csv)} INTO TABLE ${identifier(table)} FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\\r\\n' IGNORE 1 ROWS;`,
       });
       log('schema table', { table, columns: columns.length, csv });
     };
@@ -85,7 +88,12 @@ export async function schema(dir) {
       const type = row[3] === 'VARCHAR'
         ? `VARCHAR(${Number(row[2]) || 255})`
         : row[3] === 'NUMBER' ? 'DECIMAL(30,10)' : 'TEXT';
-      columns.push(`${sqlColumn(row[1])} ${type}${row[4] === 'Yes' ? '' : ' NOT NULL'}`);
+      columns.push({
+        name: row[1].trim().replace(/,+$/, '').trim(),
+        mysqlName: sqlColumn(row[1]),
+        mysqlType: type,
+        nullable: row[4] === 'Yes',
+      });
     }
     flush();
   }
