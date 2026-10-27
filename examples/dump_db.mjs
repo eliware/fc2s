@@ -1,12 +1,12 @@
-import path from 'node:path';
-import { mkdir, rm, stat } from 'node:fs/promises';
-import { config } from '../src/config.mjs';
-import { db, dumpTable } from '../src/mysql.mjs';
-import { tarGz } from '../src/archive.mjs';
+import path from "node:path";
+import { mkdir, rm, stat } from "node:fs/promises";
+import { config } from "../src/config.mjs";
+import { db, dumpTable } from "../src/mysql.mjs";
+import { tarGz } from "../src/archive.mjs";
 
 const dbName = globalThis.process.argv[2];
 if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
-  console.error('Usage: node examples/dump_db.mjs <db_name>');
+  console.error("Usage: node examples/dump_db.mjs <db_name>");
   globalThis.process.exitCode = 1;
 } else {
   const c = config();
@@ -23,7 +23,7 @@ if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
     let tables;
     try {
       const [rows] = await conn.query(`SHOW TABLES FROM \`${dbName}\``);
-      tables = rows.map(row => Object.values(row)[0]);
+      tables = rows.map((row) => Object.values(row)[0]);
     } finally {
       await conn.end();
     }
@@ -34,7 +34,7 @@ if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
     }
 
     await tarGz(archive, dumpDir);
-    if ((await stat(archive)).size === 0) throw new Error('Empty archive');
+    if ((await stat(archive)).size === 0) throw new Error("Empty archive");
     archived = true;
     console.log(archive);
   } catch (e) {

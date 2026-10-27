@@ -1,0 +1,12 @@
+version: "15.0"
+description: Repository requirements for FC2S.
+directives:
+  - id: E-8000.0
+    dos:
+      - Import FAA NASR CSV datasets into MySQL or SQLite using the selected driver.
+      - Preserve source field values as text in SQLite tables.
+      - Create backend-specific gzip exports after completed imports.
+      - Remove process-owned temporary files after exports complete.
+    donts:
+      - Do not commit credentials, downloaded datasets, or generated exports.
+      - Do not pass passwords directly in process command arguments.

@@ -1,76 +1,105 @@
 {
-    "name": "@eliware/fc2s",
-    "version": "1.0.4",
-    "description": "Node.js ESM tool that imports FAA NASR CSV data into MySQL and exports each database table as a gzip tar archive.",
-    "keywords": [
-        "faa",
-        "nasr",
-        "aviation",
-        "csv",
-        "mysql",
-        "data-import",
-        "tar",
-        "gzip",
-        "nodejs",
-        "esm"
+  "name": "@eliware/fc2s",
+  "version": "15.0.1",
+  "type": "module",
+  "description": "Node.js ESM importer for FAA NASR CSV datasets with MySQL and SQLite exports.",
+  "keywords": [
+    "faa",
+    "nasr",
+    "aviation",
+    "csv",
+    "mysql",
+    "sqlite",
+    "data-import",
+    "gzip",
+    "nodejs",
+    "esm"
+  ],
+  "private": true,
+  "files": [
+    "src/",
+    "examples/",
+    "docs/",
+    "specs/",
+    "README.md",
+    "AGENTS.md",
+    "LICENSE",
+    "RELEASE_NOTES.md",
+    ".env.example",
+    "package.json"
+  ],
+  "scripts": {
+    "latest": "node examples/get_latest.mjs",
+    "test": "eliware-test",
+    "lint": "eliware-test --lint",
+    "audit": "eliware-test --audit",
+    "format": "eliware-test --format",
+    "format:check": "eliware-test --format-check"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^18.0.9",
+    "mysql2": "^3.24.6"
+  },
+  "devDependencies": {
+    "@eliware/test": "^15.0.1",
+    "memfs": "^4.80.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.mjs"
     ],
-    "type": "module",
-    "engines": {
-        "node": ">=26"
-    },
-    "scripts": {
-        "latest": "node examples/get_latest.mjs",
-        "lint": "oxlint . --ignore-pattern node_modules",
-        "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --coverage --detectOpenHandles --silent --runInBand"
-    },
-    "dependencies": {
-        "adm-zip": "^0.6.1",
-        "csv-parse": "^7.0.3",
-        "dotenv": "^18.0.7",
-        "mysql2": "^3.24.5"
-    },
-    "devDependencies": {
-        "jest": "^30.5.2",
-        "oxlint": "^1.87.0"
-    },
-    "jest": {
-        "testEnvironment": "node",
-        "coveragePathIgnorePatterns": [],
-        "testMatch": [
-            "**/?(*.)+(spec|test).[jt]s?(x)",
-            "**/?(*.)+(spec|test).mjs",
-            "**/?(*.)+(spec|test).cjs"
-        ]
-    },
-    "author": "Eli Sterling <eli@eliware.org>",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/eliware/fc2s.git"
-    },
-    "bugs": {
-        "url": "https://github.com/eliware/fc2s/issues"
-    },
-    "homepage": "https://github.com/eliware/fc2s#readme",
-    "prettier": {
-        "printWidth": 100,
-        "tabWidth": 2,
-        "useTabs": false,
-        "semi": true,
-        "singleQuote": false,
-        "quoteProps": "as-needed",
-        "jsxSingleQuote": false,
-        "trailingComma": "all",
-        "bracketSpacing": true,
-        "bracketSameLine": false,
-        "arrowParens": "always",
-        "proseWrap": "preserve",
-        "endOfLine": "lf"
-    },
-    "eliware": {
-        "id": "E-8000",
-        "apply": [
-            "general",
-            "application"
-        ]
+    "collectCoverageFrom": [
+      "src/**/*.mjs"
+    ],
+    "coverageReporters": [
+      "text",
+      "json-summary"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
     }
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "quoteProps": "as-needed",
+    "jsxSingleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "arrowParens": "always",
+    "proseWrap": "preserve",
+    "endOfLine": "lf"
+  },
+  "author": "Eliware <eliware@eliware.org>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliware/fc2s.git"
+  },
+  "homepage": "https://github.com/eliware/fc2s#readme",
+  "bugs": {
+    "url": "https://github.com/eliware/fc2s/issues"
+  },
+  "eliware": {
+    "id": "E-8000",
+    "apply": [
+      "general",
+      "application"
+    ]
+  }
 }

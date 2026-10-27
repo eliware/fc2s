@@ -5,9 +5,17 @@
 
 # Dependencies
 node_modules/
+**/node_modules/**
 
 # Test / coverage output
 coverage/
+**/.git/**
+**/coverage/**
+**/dist/**
+**/build/**
+**/generated/**
+**/artifacts/**
+**/test-results/**
 .nyc_output/
 
 # Generated runtime data
@@ -28,6 +36,8 @@ yarn-error.log*
 # OS / editor files
 .DS_Store
 Thumbs.db
+**/.DS_Store
+**/Thumbs.db
 .vscode/
 .idea/
 *.swp
