@@ -8,3 +8,4 @@
 - [Latest dataset](get_latest.mjs)
 - [Current SQLite dataset](get_sqlite_current.mjs)
 - [Available dates](list_dates.mjs)
+- [Verified MySQL TLS check](check_mysql_tls.mjs)

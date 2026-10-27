@@ -4,6 +4,8 @@
 
 ### Added
 
+- Add optional verified TLS for MySQL connections, CSV imports, and SQL dumps.
+- Add a live MySQL TLS integration check for certificate validation and local CSV streaming.
 - Add SQLite dataset imports and gzip-compressed database exports.
 - Add usage, requirements, troubleshooting, and configuration documentation for both backends.
 - Add runnable examples for dataset selection, date listing, and SQLite imports.

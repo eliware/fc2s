@@ -32,6 +32,10 @@ Use Node.js 26 or later and npm 12 or later.
 MySQL imports require a reachable MySQL-compatible server and the `mysql` command-line client.
 SQLite imports use Node.js built-in `node:sqlite` and require no server.
 
+To enable verified TLS, set `MYSQL_SSL_CA` to the server's CA bundle. FC2S then verifies both
+the certificate chain and the server host name. TLS is optional. Without `MYSQL_SSL_CA`, FC2S
+uses the server's regular connection behavior.
+
 ## Setup
 
 Run `npm ci` from the repository root. Copy `.env.example` to `.env` and configure the selected backend.
@@ -68,6 +72,7 @@ Store MySQL credentials in the local `.env` file. SQLite runs without database c
 
 `DB_DRIVER` selects `mysql` or `sqlite` and defaults to `mysql`.
 `MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD` are required for MySQL. `MYSQL_PORT` is optional.
+`MYSQL_SSL_CA` enables verified TLS with certificate-chain and server host-name verification.
 `NASR_PREFIX` sets the imported database name prefix and defaults to `NASR_`.
 `EXPORT_DIR` sets the output directory and defaults to `./exports`.
 

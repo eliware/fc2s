@@ -13,6 +13,8 @@ Install dependencies with `npm ci`. Copy `.env.example` to `.env` before a MySQL
 Set `DB_DRIVER` to `mysql` or `sqlite`. Its default is `mysql`.
 
 MySQL requires `MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD`. `MYSQL_PORT` defaults to `3306`.
+Set optional `MYSQL_SSL_CA` to enable TLS with certificate-chain and server host-name
+verification. MariaDB needs `local_infile=ON` to load CSV data streamed from the FC2S host.
 
 `NASR_PREFIX` defaults to `NASR_`. `EXPORT_DIR` defaults to `./exports`.
 

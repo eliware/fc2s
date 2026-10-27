@@ -12,6 +12,7 @@ const { db, dumpTable, run } = await import("../src/mysql.mjs");
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const p = new EventEmitter();
+  p.stdin = { end: (input) => (p.input = input) };
   p.stdout = new EventEmitter();
   p.stderr = new EventEmitter();
   queueMicrotask(() => {
@@ -32,9 +33,22 @@ test("db uses injected mysql client and stream factory", async () => {
     },
   };
   expect(
-    db({ host: "h", port: 1, user: "u", password: "p" }, { mysql, createReadStream }).options,
+    db(
+      { host: "h", port: 1, user: "u", password: "p", sslCa: "/ca.pem" },
+      { mysql, createReadStream, readFileSync: () => "CA CERT" },
+    ).options,
   ).toMatchObject({ host: "h", port: 1, user: "u", password: "p" });
+  expect(connection.options.ssl).toEqual({
+    ca: "CA CERT",
+    rejectUnauthorized: true,
+    verifyIdentity: true,
+  });
   expect(connection.options.infileStreamFactory("x")).toBe("x");
+});
+
+test("db keeps TLS optional when no CA is configured", () => {
+  const mysql = { createConnection: (options) => options };
+  expect(db({ host: "h", port: 1, user: "u", password: "p" }, { mysql })).not.toHaveProperty("ssl");
 });
 
 test("run captures output and injected spawn failures", async () => {
@@ -62,30 +76,64 @@ test("dumpTable uses injected process and pipeline", async () => {
   const calls = [];
   const stream = {};
   const spawn = (command, args, options) => {
-    calls.push({ command, args, options });
-    return child({ output: "SQL" });
+    const process = child({ output: "SQL" });
+    calls.push({ command, args, options, process });
+    return process;
   };
   const pipeline = async (input, output) => {
     expect(input).toBeDefined();
     expect(output).toBe(stream);
   };
-  await dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "table", "x.sql", {
-    spawn,
-    pipeline,
-    createWriteStream: () => stream,
-  });
+  await dumpTable(
+    { host: "h", port: 3306, user: "u", password: "p", sslCa: "/ca.pem" },
+    "db",
+    "table",
+    "x.sql",
+    {
+      spawn,
+      pipeline,
+      createWriteStream: () => stream,
+    },
+  );
   expect(calls[0].args).not.toContain("--password=p");
-  expect(calls[0].options.env.MYSQL_PWD).toBe("p");
+  expect(calls[0].args[0]).toBe("--no-defaults");
+  expect(calls[0].args).toContain("--password");
+  expect(calls[0].args).not.toContain("p");
+  expect(calls[0].process.input).toBe("p\n");
+  expect(calls[0].options.env.MYSQL_PWD).toBe("");
+  expect(calls[0].options.env.MARIADB_PWD).toBe("");
   expect(calls[0].args).toContain("table");
+  expect(calls[0].args).toContain("--ssl");
+  expect(calls[0].args).toContain("--ssl-verify-server-cert");
+  expect(calls[0].args).toContain("/ca.pem");
+});
+
+test("dumpTable keeps TLS optional when no CA is configured", async () => {
+  let args;
+  await dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "table", "x.sql", {
+    spawn: (command, receivedArgs) => {
+      args = receivedArgs;
+      return child();
+    },
+    pipeline: async () => {},
+    createWriteStream: () => ({}),
+  });
+  expect(args).not.toContain("--ssl");
 });
 
 test("dumpTable reports injected command failure", async () => {
   await expect(
-    dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", "x", {
-      spawn: () => child({ error: "dump failed", code: 3 }),
-      pipeline: async () => {},
-      createWriteStream: () => ({}),
-    }),
+    dumpTable(
+      { host: "h", port: 3306, user: "u", password: "p", sslCa: "/ca.pem" },
+      "db",
+      "t",
+      "x",
+      {
+        spawn: () => child({ error: "dump failed", code: 3 }),
+        pipeline: async () => {},
+        createWriteStream: () => ({}),
+      },
+    ),
   ).rejects.toThrow("dump failed");
 });
 
@@ -114,7 +162,10 @@ test("dumpTable uses fallback error when stderr is empty", async () => {
 test("db uses default read stream dependency", async () => {
   const mysql = { createConnection: (options) => options };
   putFile("/workspace/mysql-input", "input");
-  const options = db({ host: "h", port: 1, user: "u", password: "p" }, { mysql });
+  const options = db(
+    { host: "h", port: 1, user: "u", password: "p", sslCa: "/ca.pem" },
+    { mysql, readFileSync: () => "CA" },
+  );
   const stream = options.infileStreamFactory("/workspace/mysql-input");
   expect(stream).toBeDefined();
   stream.destroy();
@@ -138,7 +189,13 @@ test("dumpTable uses default pipeline and write stream", async () => {
     });
     return p;
   };
-  await dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", file, { spawn });
+  await dumpTable(
+    { host: "h", port: 3306, user: "u", password: "p", sslCa: "/ca.pem" },
+    "db",
+    "t",
+    file,
+    { spawn },
+  );
   expect(getFile(file, "utf8")).toBe("SQL");
   removeTree(root);
 });

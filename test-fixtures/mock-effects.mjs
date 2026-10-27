@@ -15,6 +15,7 @@ export async function mockEffects() {
   await jest.unstable_mockModule("node:child_process", async () => ({
     spawn: (command, args = []) => {
       const child = new EventEmitter();
+      child.stdin = new PassThrough();
       child.stdout = new PassThrough();
       child.stderr = new PassThrough();
       queueMicrotask(() => {

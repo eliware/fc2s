@@ -7,6 +7,7 @@ export function config(overrides = {}) {
     user: process.env.MYSQL_USERNAME,
     password: process.env.MYSQL_PASSWORD,
     port: Number(process.env.MYSQL_PORT || 3306),
+    sslCa: process.env.MYSQL_SSL_CA,
     prefix: process.env.NASR_PREFIX || "NASR_",
     exportDir: process.env.EXPORT_DIR || "./exports",
     ...overrides,
