@@ -14,6 +14,7 @@ import { importSqlite as defaultImportSqlite } from "./sqlite.mjs";
 import { gzipFile as defaultGzipFile, tarGz as defaultTarGz } from "./archive.mjs";
 import { log } from "./debug.mjs";
 import { createProcess } from "./process/selector.mjs";
+import { cleanupProcess } from "./process/cleanup.mjs";
 
 export const defaultDependencies = {
   config: defaultConfig,
@@ -102,21 +103,7 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
     operationError = error;
   }
 
-  let cleanupError;
-  try {
-    await rm(work, { recursive: true, force: true });
-  } catch (error) {
-    cleanupError = error;
-  }
-  if (archived) {
-    try {
-      await rm(dumpDir, { recursive: true, force: true });
-    } catch (error) {
-      cleanupError ??= error;
-    }
-  }
-  if (operationError) throw operationError;
-  if (cleanupError) throw cleanupError;
+  await cleanupProcess(work, dumpDir, archived, rm, operationError);
   return result;
 }
 

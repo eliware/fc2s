@@ -1,15 +1,16 @@
-import "dotenv/config";
+import { loadEnvironment } from "./config/environment.mjs";
 
 export function config(overrides = {}) {
+  const env = loadEnvironment();
   const values = {
-    driver: process.env.DB_DRIVER || "mysql",
-    host: process.env.MYSQL_HOSTNAME,
-    user: process.env.MYSQL_USERNAME,
-    password: process.env.MYSQL_PASSWORD,
-    port: Number(process.env.MYSQL_PORT || 3306),
-    sslCa: process.env.MYSQL_SSL_CA,
-    prefix: process.env.NASR_PREFIX || "NASR_",
-    exportDir: process.env.EXPORT_DIR || "./exports",
+    driver: env.DB_DRIVER || "mysql",
+    host: env.MYSQL_HOSTNAME,
+    user: env.MYSQL_USERNAME,
+    password: env.MYSQL_PASSWORD,
+    port: Number(env.MYSQL_PORT || 3306),
+    sslCa: env.MYSQL_SSL_CA,
+    prefix: env.NASR_PREFIX || "NASR_",
+    exportDir: env.EXPORT_DIR || "./exports",
     ...overrides,
   };
 

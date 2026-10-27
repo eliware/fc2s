@@ -11,7 +11,7 @@ test("config requires credentials", () => {
   ).toThrow("Missing MYSQL_");
 });
 
-test("config uses environment defaults and overrides optional values", () => {
+test("config uses environment values and fallback defaults", () => {
   const saved = { ...process.env };
   process.env.MYSQL_HOSTNAME = "env-host";
   process.env.MYSQL_USERNAME = "env-user";
@@ -22,6 +22,7 @@ test("config uses environment defaults and overrides optional values", () => {
   process.env.NASR_PREFIX = "X_";
   process.env.EXPORT_DIR = "/tmp/x";
   expect(config()).toMatchObject({
+    driver: "mysql",
     host: "env-host",
     user: "env-user",
     password: "env-pass",
@@ -30,19 +31,6 @@ test("config uses environment defaults and overrides optional values", () => {
     prefix: "X_",
     exportDir: "/tmp/x",
   });
-  process.env = saved;
-});
-
-test.each(["host", "user", "password"])("config reports missing %s", (key) => {
-  const values = { driver: "mysql", host: "h", user: "u", password: "p", sslCa: "/ca.pem" };
-  values[key] = undefined;
-  expect(() => config(values)).toThrow(
-    `Missing MYSQL_${key === "host" ? "HOSTNAME" : key === "user" ? "USERNAME" : "PASSWORD"}`,
-  );
-});
-
-test("config applies optional defaults", () => {
-  const saved = { ...process.env };
   for (const key of [
     "DB_DRIVER",
     "MYSQL_HOSTNAME",
@@ -54,12 +42,21 @@ test("config applies optional defaults", () => {
     "EXPORT_DIR",
   ])
     delete process.env[key];
-  expect(config({ host: "h", user: "u", password: "p", sslCa: "/ca.pem" })).toMatchObject({
+  expect(config({ host: "h", user: "u", password: "p" })).toMatchObject({
+    driver: "mysql",
     port: 3306,
     prefix: "NASR_",
     exportDir: "./exports",
   });
   process.env = saved;
+});
+
+test.each(["host", "user", "password"])("config reports missing %s", (key) => {
+  const values = { driver: "mysql", host: "h", user: "u", password: "p", sslCa: "/ca.pem" };
+  values[key] = undefined;
+  expect(() => config(values)).toThrow(
+    `Missing MYSQL_${key === "host" ? "HOSTNAME" : key === "user" ? "USERNAME" : "PASSWORD"}`,
+  );
 });
 
 test("MySQL config allows TLS to remain unconfigured", () => {

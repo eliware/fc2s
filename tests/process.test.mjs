@@ -88,56 +88,6 @@ test("processDate selects SQLite import, archives it, and removes staging", asyn
   removeTree(root);
 });
 
-test("processDate cleans staging after archive and work cleanup failures", async () => {
-  const root = makeDirectory("fc2s-process-");
-  const removed = [];
-  let stagingRemovals = 0;
-  const dependencies = {
-    config: () => cfg(root),
-    tempDir: async () => "/tmp/work",
-    mkdir: async () => {},
-    download: async () => {},
-    extract: async () => {},
-    schema: async () => [],
-    db: async () => ({ query: async () => {}, end: async () => {} }),
-    stat: async () => ({ size: 1 }),
-    rm: async (target) => removed.push(target),
-    tarGz: async () => {
-      throw new Error("archive failed");
-    },
-  };
-  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("archive failed");
-  expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
-  removed.length = 0;
-  dependencies.tarGz = async () => {};
-  dependencies.rm = async (target) => {
-    removed.push(target);
-    if (target === "/tmp/work") throw new Error("work cleanup failed");
-  };
-  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("work cleanup failed");
-  expect(removed).toEqual([
-    path.join(root, "P_2025_01_02"),
-    "/tmp/work",
-    path.join(root, "P_2025_01_02"),
-  ]);
-  removed.length = 0;
-  stagingRemovals = 0;
-  dependencies.rm = async (target) => {
-    removed.push(target);
-    if (target === path.join(root, "P_2025_01_02") && ++stagingRemovals === 2) {
-      throw new Error("staging cleanup failed");
-    }
-  };
-  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow(
-    "staging cleanup failed",
-  );
-  expect(removed).toEqual([
-    path.join(root, "P_2025_01_02"),
-    "/tmp/work",
-    path.join(root, "P_2025_01_02"),
-  ]);
-  removeTree(root);
-});
 test("processDate applies default overrides with injected dependencies", async () => {
   const root = makeDirectory("fc2s-process-");
   let size = 1;

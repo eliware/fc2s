@@ -18,23 +18,17 @@ test("dataUrl rejects invalid date", () => {
   expect(() => dataUrl("nope")).toThrow("Invalid date");
 });
 
-test("availableDates fetches and parses page", async () => {
-  const old = globalThis.fetch;
-  globalThis.fetch = async () => ({
-    ok: true,
-    text: async () => "Subscription effective April 1, 2025",
-  });
-  await expect(availableDates("x")).resolves.toEqual(["2025-04-01"]);
-  globalThis.fetch = old;
-});
-
 test("availableDates uses FAA home page by default", async () => {
   const old = globalThis.fetch;
   globalThis.fetch = async (url) => {
     expect(url).toBe(HOME_PAGE);
-    return { ok: true, text: async () => "Subscription effective April 1, 2025" };
+    return {
+      ok: true,
+      text: async () =>
+        "Subscription effective April 1, 2025; Subscription effective March 1, 2025",
+    };
   };
-  await expect(availableDates()).resolves.toEqual(["2025-04-01"]);
+  await expect(availableDates()).resolves.toEqual(["2025-04-01", "2025-03-01"]);
   globalThis.fetch = old;
 });
 
