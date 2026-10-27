@@ -22,67 +22,45 @@ Node.js ESM importer for FAA NASR CSV datasets with MySQL and SQLite exports.
 
 ## Features
 
-FC2S downloads FAA NASR datasets, imports their CSV tables, and exports them for local use.
-The MySQL backend creates one SQL dump for each table in a gzip-compressed tar archive.
-The SQLite backend creates a gzip-compressed SQLite database file.
+FC2S downloads FAA NASR datasets, imports CSV tables, and creates compressed MySQL or SQLite exports.
 
 ## Requirements
 
-Use Node.js 26 or later and npm 12 or later.
-MySQL imports require a reachable MySQL-compatible server and the `mysql` command-line client.
-SQLite imports use Node.js built-in `node:sqlite` and require no server.
-
-To enable verified TLS, set `MYSQL_SSL_CA` to the server's CA bundle. FC2S then verifies both
-the certificate chain and the server host name. TLS is optional. Without `MYSQL_SSL_CA`, FC2S
-uses the server's regular connection behavior.
+Use Node.js 26 or later and npm 12 or later. MySQL imports require a MySQL-compatible server and `mysqldump`. SQLite uses Node.js built-in `node:sqlite`.
 
 ## Setup
 
 Run `npm ci` from the repository root. Copy `.env.example` to `.env` and configure the selected backend.
-Set `DB_DRIVER=mysql` for MySQL or `DB_DRIVER=sqlite` for SQLite.
 
 ## Usage
 
-Run `npm run get:dates` to list FAA release dates.
-Run `npm run current` or `npm run latest` to import using the driver set in `.env`.
-Run `node bin/get_all.mjs` to import all available datasets.
-Read [usage documentation](docs/usage.md), [command line tools](bin/README.md), and [release notes](RELEASE_NOTES.md).
+Run `npm run get:dates` to list FAA release dates. Run `npm run current` or `npm run latest` to import a dataset.
+
+See [usage](docs/usage.md), the [documentation index](docs/README.md), [command line tools](bin/README.md), and [release notes](RELEASE_NOTES.md).
 
 ## Development
 
-Read [AGENTS.md](AGENTS.md), the [documentation index](docs/README.md), the [requirements](docs/requirements.md), and the [specifications index](specs/README.md) before changing behavior.
-Use `npm run lint` and `npm run format:check` for focused checks.
+Read [AGENTS.md](AGENTS.md) for contributor instructions and [specifications](specs/README.md) for repository requirements.
 
 ## Testing
 
-Run focused tests first. Use `npm test -- tests/sqlite.test.mjs` for one test file.
-Use `npm test -- tests/config.test.mjs tests/process.test.mjs` for multiple test files.
-Run the full `npm test` suite before a commit or release.
+Run `npm test` for aggregate validation.
 
 ## Troubleshooting
 
-Run `npm ci` and `npm test` when dependencies or behavior are unclear.
-Read [troubleshooting documentation](docs/troubleshooting.md) for configuration and runtime errors.
+See [troubleshooting](docs/troubleshooting.md) for common setup and runtime errors.
 
 ## Security
 
-Keep credentials, downloaded datasets, and generated exports outside Git.
-Store MySQL credentials in the local `.env` file. SQLite runs without database credentials.
+Keep credentials, downloaded datasets, and generated exports out of Git. Store MySQL credentials in the local `.env` file.
 
 ## Configuration
 
-`DB_DRIVER` selects `mysql` or `sqlite` and defaults to `mysql`.
-`MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD` are required for MySQL. `MYSQL_PORT` is optional.
-`MYSQL_SSL_CA` enables verified TLS with certificate-chain and server host-name verification.
-`NASR_PREFIX` sets the imported database name prefix and defaults to `NASR_`.
-`EXPORT_DIR` sets the output directory and defaults to `./exports`.
+See the [configuration table](docs/usage.md#install-and-configure) for environment variables, defaults, and required values.
 
 ## Operations
 
-The CLI imports current, latest, date-specific, or all datasets.
-MySQL output is `exports/<db_name>.sql.tar.gz` with one SQL file for each table.
-SQLite output is `exports/<db_name>.sqlite.gz` with one compressed database file.
-See [usage documentation](docs/usage.md) for commands and output details.
+Run the CLI to import current, latest, date-specific, or all datasets. See [usage](docs/usage.md) for commands and output details.
 
 ## Support
 
