@@ -2,7 +2,7 @@ import { EventEmitter } from "node:events";
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { run } = await import("../../src/commands/runner.mjs");
+const { run, waitForExit } = await import("../../src/commands/runner.mjs");
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const process = new EventEmitter();
@@ -51,4 +51,10 @@ test("run handles children without output streams", async () => {
 
 test("run uses the default spawn implementation", async () => {
   await expect(run("fake-output", [])).resolves.toBe("ok");
+});
+
+test("waitForExit uses a caller-specific fallback error", async () => {
+  await expect(
+    waitForExit(child({ code: 3 }), (code) => `mysqldump failed: ${code}`),
+  ).rejects.toThrow("mysqldump failed: 3");
 });

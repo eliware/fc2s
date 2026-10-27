@@ -8,6 +8,7 @@ import {
 
 await mockEffects();
 const { dumpTable } = await import("../../src/mysql/table-dumper.mjs");
+const { dumpTable: dumpThroughFacade } = await import("../../src/mysql.mjs");
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const p = new EventEmitter();
@@ -56,6 +57,19 @@ test("dumpTable uses injected process and pipeline", async () => {
   expect(calls[0].args).toContain("--ssl");
   expect(calls[0].args).toContain("--ssl-verify-server-cert");
   expect(calls[0].args).toContain("/ca.pem");
+});
+
+test("mysql facade delegates table dumping", async () => {
+  let command;
+  await dumpThroughFacade({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", "x", {
+    spawn: (name) => {
+      command = name;
+      return child();
+    },
+    pipeline: async () => {},
+    createWriteStream: () => ({}),
+  });
+  expect(command).toBe("mysqldump");
 });
 
 test("dumpTable keeps TLS optional when no CA is configured", async () => {

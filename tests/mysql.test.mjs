@@ -1,8 +1,7 @@
-import { EventEmitter } from "node:events";
 import { mockEffects, putFile } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { db, dumpTable } = await import("../src/mysql.mjs");
+const { db } = await import("../src/mysql.mjs");
 
 test("db uses injected mysql client and stream factory", async () => {
   const connection = {};
@@ -48,22 +47,4 @@ test("db rejects with default mysql client when connection fails", async () => {
   await expect(
     db({ host: "127.0.0.1", port: 1, user: "invalid", password: "invalid" }),
   ).rejects.toBeDefined();
-});
-
-test("mysql facade delegates table dumping", async () => {
-  let command;
-  await dumpTable({ host: "h", port: 1, user: "u", password: "p" }, "d", "t", "x", {
-    spawn: (name) => {
-      command = name;
-      const child = new EventEmitter();
-      child.stdin = { end: () => {} };
-      child.stdout = new EventEmitter();
-      child.stderr = new EventEmitter();
-      queueMicrotask(() => child.emit("close", 0));
-      return child;
-    },
-    pipeline: async () => {},
-    createWriteStream: () => ({}),
-  });
-  expect(command).toBe("mysqldump");
 });
