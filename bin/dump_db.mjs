@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { config } from "../src/config.mjs";
-import { db, dumpTable } from "../src/mysql.mjs";
+import { listTables, dumpTable } from "../src/mysql.mjs";
 import { tarGz } from "../src/archive.mjs";
 
 const dbName = globalThis.process.argv[2];
@@ -19,15 +19,7 @@ if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
     await rm(dumpDir, { recursive: true, force: true });
     await mkdir(dumpDir, { recursive: true });
 
-    const conn = await db(c);
-    let tables;
-    try {
-      const [rows] = await conn.query(`SHOW TABLES FROM \`${dbName}\``);
-      tables = rows.map((row) => Object.values(row)[0]);
-    } finally {
-      await conn.end();
-    }
-
+    const tables = await listTables(c, dbName);
     for (const table of tables) {
       if (!/^[A-Za-z0-9_$]+$/.test(table)) throw new Error(`Unsafe table name: ${table}`);
       await dumpTable(c, dbName, table, path.join(dumpDir, `${table}.sql`));
