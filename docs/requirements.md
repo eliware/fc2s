@@ -1,49 +1,41 @@
-# Requirements
+# Requirements and behavior
 
-## Purpose
+## Runtime
 
-FC2S downloads FAA NASR datasets, imports their CSV tables into MySQL or SQLite, and writes compressed exports.
+FC2S requires Node.js 26 or newer. The SQLite backend uses the built-in `node:sqlite` module. Install package dependencies with `npm ci`.
 
-## Runtime and setup
+The host requires network access to the FAA NASR subscription page and data archive host. It requires writable temporary storage for ZIP downloads and extraction. Reserve sufficient capacity in `EXPORT_DIR` for archives and working files.
 
-Use Node.js 26 or newer. The project uses native ECMAScript modules and Node's built-in SQLite support.
+MySQL imports require a reachable MySQL-compatible server and `mysqldump` on `PATH`. The database account must create and drop databases, create tables, load rows, list tables, and dump table contents. The server must allow `LOAD DATA LOCAL INFILE` so FC2S can send CSV rows from the client host.
 
-Install dependencies with `npm ci`. Copy `.env.example` to `.env` before a MySQL import.
+SQLite imports run locally. They run without a MySQL server or MySQL credentials.
 
-Set `DB_DRIVER` to `mysql` or `sqlite`. Its default is `mysql`.
+## Configuration
 
-MySQL requires `MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD`. `MYSQL_PORT` defaults to `3306`.
-Set optional `MYSQL_SSL_CA` to enable TLS with certificate-chain and server host-name
-verification. MariaDB needs `local_infile=ON` to load CSV data streamed from the FC2S host.
+FC2S reads environment variables and values from `.env` in the project root. `DB_DRIVER` accepts `mysql` or `sqlite`. Its default is `mysql`.
 
-`NASR_PREFIX` defaults to `NASR_`. `EXPORT_DIR` defaults to `./exports`.
+MySQL uses `MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD`. All three are required. `MYSQL_PORT` defaults to `3306`. `MYSQL_SSL_CA` is optional. When set, FC2S enables TLS and verifies the trusted CA chain and server host name. Without this variable, TLS is not requested by FC2S.
 
-SQLite requires no MySQL server or credentials.
+`NASR_PREFIX` defaults to `NASR_`. `EXPORT_DIR` defaults to `./exports`. The [usage guide](usage.md#install-and-configure) lists each variable.
 
-## Dataset workflow
+## Import workflow
 
-The application reads FAA dataset dates, selects the requested dataset, downloads its ZIP, and extracts CSV files into a temporary directory.
+FC2S reads FAA dates from release labels and sorts them newest first. It downloads the selected ZIP file and extracts its CSV files into a temporary directory. The FAA data-structure CSV supplies table and field definitions.
 
-It reads the FAA schema and creates database tables. SQLite columns use text values to preserve source representations.
+For MySQL, FC2S drops and recreates the date-named database. It creates the tables, loads CSV rows, dumps each table with `mysqldump`, and packages the dumps in a `.sql.tar.gz` archive.
 
-MySQL creates one SQL dump for each table and packages the dumps as `<db_name>.sql.tar.gz`.
+For SQLite, FC2S creates a local database with text columns. It imports CSV data in a transaction and compresses the finished database to `.sqlite.gz`.
 
-SQLite writes `<db_name>.sqlite.gz`, which decompresses to one SQLite database file.
+`latest` selects the newest listed date. `current` selects the second newest when available. It uses the only available date when the page lists one. `all` selects every listed date and starts those imports together. A date command selects one ISO date.
 
-The application validates the completed output and removes temporary working files after success.
+Completed runs remove download, extraction, and staging files. Database and archive outputs remain. A failed run can produce an incomplete database or staging directory. Inspect these before retrying.
 
-## Command line
+## Commands
 
-Run `node bin/get_current.mjs` for the current dataset, `node bin/get_latest.mjs` for the latest,
-or `node bin/get_all.mjs` for all available datasets. Run `node bin/get_date.mjs YYYY-MM-DD` for
-one date. Add `--verbose` to show detailed logs. Use `node bin/get_sqlite_current.mjs` to select
-SQLite directly, or `node bin/list_dates.mjs` to list FAA release dates. `node bin/dump_db.mjs
-<db_name>` exports an existing MySQL database.
+Run `npm run get:dates` to list FAA dates. Run `npm run current` or `npm run latest` to import with the backend from `.env`. Other scripts are listed in the [command guide](../bin/README.md). See [Usage](usage.md#select-a-dataset) for examples.
 
-## Safety
+## Data and credentials
 
-Keep `.env`, downloaded datasets, and exports outside Git. Validate database identifiers before using them in SQL or file paths.
+A repeated MySQL import drops and recreates its date-named database. Set `NASR_PREFIX` to prevent collisions with unrelated databases. Keep `.env` out of source control because it contains database credentials.
 
-Use safe process arguments for database tools. Do not expose passwords in command-line arguments or logs.
-
-Remove only process-owned temporary paths. Preserve the initial error when cleanup or external operations fail.
+FAA datasets and generated exports can be large. Keep them out of source control and reserve disk capacity for output and temporary files. Verbose logs can contain paths, host details, and error stacks. Inspect logs before sharing them.
