@@ -1,15 +1,7 @@
-import { fileInfo, getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
+import { getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { download, tempDir } = await import("../../src/files/transfer.mjs");
-
-test("tempDir creates unique in-memory directories", async () => {
-  const first = await tempDir();
-  const second = await tempDir();
-  expect(first).not.toBe(second);
-  expect(fileInfo(first).isDirectory()).toBe(true);
-  expect(fileInfo(second).isDirectory()).toBe(true);
-});
+const { download } = await import("../../src/files/transfer.mjs");
 
 test("download rejects HTTP errors", async () => {
   const oldFetch = globalThis.fetch;

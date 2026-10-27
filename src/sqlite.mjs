@@ -1,7 +1,6 @@
-import { createReadStream } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { parse } from "csv-parse";
-import { identifier } from "./schema.mjs";
+import { identifier } from "./schema/sql-builder.mjs";
+import { readCsvRows } from "./sqlite/csv-reader.mjs";
 
 function quoteIdentifier(value, isColumn = false) {
   if (isColumn) {
@@ -14,7 +13,6 @@ function quoteIdentifier(value, isColumn = false) {
 
 export async function importSqlite(file, tables, deps = {}) {
   const Database = deps.DatabaseSync ?? DatabaseSync;
-  const createRead = deps.createReadStream ?? createReadStream;
   const database = new Database(file);
   let inTransaction = false;
 
@@ -32,27 +30,20 @@ export async function importSqlite(file, tables, deps = {}) {
       const insert = database.prepare(
         `INSERT INTO ${quoteIdentifier(table.table)} (${names.join(", ")}) VALUES (${names.map(() => "?").join(", ")})`,
       );
-      let rowNumber = 0;
+      let currentRecord;
       try {
-        const source = createRead(table.csv);
-        const parser = parse({
-          bom: true,
-          skip_empty_lines: true,
-          relax_column_count: true,
-        });
-        source.on("error", (error) => parser.destroy(error));
-        const records = source.pipe(parser);
-        for await (const record of records) {
-          rowNumber += 1;
-          if (rowNumber === 1) continue;
-          if (record.length !== table.columns.length) {
-            throw new Error(`Expected ${table.columns.length} fields, received ${record.length}`);
-          }
+        for await (const { record, rowNumber } of readCsvRows(
+          table.csv,
+          table.columns.length,
+          deps,
+        )) {
+          currentRecord = rowNumber;
           insert.run(...record);
         }
       } catch (error) {
+        const location = error.rowNumber ?? currentRecord;
         throw new Error(
-          `Failed importing ${table.table} from ${table.csv}${rowNumber ? ` near record ${rowNumber}` : ""}: ${error.message}`,
+          `Failed importing ${table.table} from ${table.csv}${location ? ` near record ${location}` : ""}: ${error.message}`,
           { cause: error },
         );
       }

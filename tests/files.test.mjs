@@ -1,15 +1,16 @@
 import { fileInfo, getFile, mockEffects } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const [facade, extractor, transfer] = await Promise.all([
+const [facade, extractor, transfer, tempDirectory] = await Promise.all([
   import("../src/files.mjs"),
   import("../src/files/extractor.mjs"),
   import("../src/files/transfer.mjs"),
+  import("../src/files/temp-directory.mjs"),
 ]);
 
 test("files facade delegates transfer and extraction operations", async () => {
   expect(facade.download).not.toBe(transfer.download);
-  expect(facade.tempDir).not.toBe(transfer.tempDir);
+  expect(facade.tempDir).not.toBe(tempDirectory.tempDir);
   expect(facade.extract).not.toBe(extractor.extract);
   expect(typeof facade.mkdir).toBe("function");
   expect(typeof facade.readFile).toBe("function");

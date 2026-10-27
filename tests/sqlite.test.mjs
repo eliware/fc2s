@@ -52,27 +52,6 @@ test("imports CSV rows into SQLite and keeps source values as text", async () =>
   database.close();
 });
 
-test("rejects CSV rows that do not match the schema field count", async () => {
-  const { database, factory } = inMemoryDatabase();
-  await expect(
-    importSqlite(
-      ":memory:",
-      [
-        {
-          table: "BAD",
-          csv: "/fixtures/bad.csv",
-          columns: [
-            { name: "A", nullable: true },
-            { name: "B", nullable: true },
-          ],
-        },
-      ],
-      { DatabaseSync: factory, createReadStream: () => Readable.from(["A,B\nonly-one-field\n"]) },
-    ),
-  ).rejects.toThrow("Expected 2 fields, received 1");
-  database.close();
-});
-
 test("uses default SQLite and stream dependencies with an in-memory database", async () => {
   await expect(importSqlite(":memory:", [])).resolves.toBeUndefined();
 
@@ -88,6 +67,38 @@ test("uses default SQLite and stream dependencies with an in-memory database", a
   expect(database.prepare("SELECT ID FROM APT").all()).toEqual([{ ID: "0007" }]);
   database.close();
   removeTree(root);
+});
+
+test("wraps CSV reader failures with import context and rolls back", async () => {
+  const { database, factory } = inMemoryDatabase();
+  await expect(
+    importSqlite(
+      ":memory:",
+      [{ table: "APT", csv: "/fixtures/bad.csv", columns: [{ name: "ID", nullable: true }] }],
+      { DatabaseSync: factory, createReadStream: () => Readable.from(["ID\n001,extra\n"]) },
+    ),
+  ).rejects.toThrow(
+    "Failed importing APT from /fixtures/bad.csv near record 2: Expected 1 fields, received 2",
+  );
+  expect(database.prepare("SELECT name FROM sqlite_master WHERE name = 'APT'").all()).toEqual([]);
+  database.close();
+});
+
+test("wraps a stream failure before rows without adding a record number", async () => {
+  const { database, factory } = inMemoryDatabase();
+  const failingStream = new Readable({
+    read() {
+      this.destroy(new Error("stream failed"));
+    },
+  });
+  await expect(
+    importSqlite(
+      ":memory:",
+      [{ table: "APT", csv: "/fixtures/a.csv", columns: [{ name: "ID", nullable: true }] }],
+      { DatabaseSync: factory, createReadStream: () => failingStream },
+    ),
+  ).rejects.toThrow("Failed importing APT from /fixtures/a.csv: stream failed");
+  database.close();
 });
 
 test("rejects unsafe columns and skips rollback when transaction start fails", async () => {
@@ -110,21 +121,4 @@ test("rejects unsafe columns and skips rollback when transaction start fails", a
   await expect(importSqlite(":memory:", [], { DatabaseSync: FailingDatabase })).rejects.toThrow(
     "transaction failed",
   );
-});
-
-test("reports a stream failure before the first CSV record", async () => {
-  const { database, factory } = inMemoryDatabase();
-  const failingStream = new Readable({
-    read() {
-      this.destroy(new Error("stream failed"));
-    },
-  });
-  await expect(
-    importSqlite(
-      ":memory:",
-      [{ table: "APT", csv: "/fixtures/a.csv", columns: [{ name: "ID", nullable: true }] }],
-      { DatabaseSync: factory, createReadStream: () => failingStream },
-    ),
-  ).rejects.toThrow("Failed importing APT from /fixtures/a.csv: stream failed");
-  database.close();
 });
