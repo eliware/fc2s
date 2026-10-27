@@ -1,5 +1,6 @@
 import { createReadStream } from "node:fs";
 import { parse } from "csv-parse";
+import { isHeader } from "./header-detection.mjs";
 
 export async function* readCsvRows(file, columns, deps = {}) {
   const createRead = deps.createReadStream ?? createReadStream;
@@ -11,9 +12,7 @@ export async function* readCsvRows(file, columns, deps = {}) {
   try {
     for await (const record of source.pipe(parser)) {
       rowNumber += 1;
-      const isHeader =
-        record.length === columns.length && record.every((name, i) => name === columns[i]);
-      if (rowNumber === 1 && isHeader) continue;
+      if (rowNumber === 1 && isHeader(record, columns)) continue;
       if (record.length !== columns.length) {
         const error = new Error(`Expected ${columns.length} fields, received ${record.length}`);
         error.rowNumber = rowNumber;
