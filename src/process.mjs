@@ -13,6 +13,7 @@ import { db as defaultDb, dumpTable as defaultDumpTable } from "./mysql.mjs";
 import { importSqlite as defaultImportSqlite } from "./sqlite.mjs";
 import { gzipFile as defaultGzipFile, tarGz as defaultTarGz } from "./archive.mjs";
 import { log } from "./debug.mjs";
+import { createProcess } from "./process/selector.mjs";
 
 export const defaultDependencies = {
   config: defaultConfig,
@@ -119,15 +120,4 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
   return result;
 }
 
-export async function process(mode = "current", overrides = {}, dependencies = {}) {
-  const d = { ...defaultDependencies, ...dependencies };
-  const availableDates = d.availableDates;
-  const processDateImpl = d.processDate ?? ((date) => processDate(date, overrides, d));
-  const dates = await availableDates();
-  if (!dates.length) throw new Error("No FAA dates");
-  const selected =
-    mode === "all"
-      ? [...dates].reverse()
-      : [mode === "latest" ? dates[0] : dates[Math.min(1, dates.length - 1)]];
-  return Promise.all(selected.map(processDateImpl));
-}
+export const process = createProcess(processDate, defaultDependencies);

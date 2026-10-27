@@ -101,17 +101,7 @@ test("wraps a stream failure before rows without adding a record number", async 
   database.close();
 });
 
-test("rejects unsafe columns and skips rollback when transaction start fails", async () => {
-  const { database, factory } = inMemoryDatabase();
-  await expect(
-    importSqlite(
-      ":memory:",
-      [{ table: "APT", csv: "/fixtures/a.csv", columns: [{ name: "BAD-NAME", nullable: true }] }],
-      { DatabaseSync: factory, createReadStream: () => Readable.from([]) },
-    ),
-  ).rejects.toThrow("Unsafe column name");
-  database.close();
-
+test("skips rollback when transaction start fails", async () => {
   class FailingDatabase {
     exec() {
       throw new Error("transaction failed");

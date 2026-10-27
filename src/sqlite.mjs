@@ -1,15 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
-import { identifier } from "./schema/identifier.mjs";
+import { quoteIdentifier } from "./sqlite/identifier.mjs";
 import { readCsvRows } from "./sqlite/csv-reader.mjs";
-
-function quoteIdentifier(value, isColumn = false) {
-  if (isColumn) {
-    if (!/^[A-Za-z_][A-Za-z0-9_ ]*$/.test(value)) throw new Error(`Unsafe column name: ${value}`);
-  } else {
-    identifier(value);
-  }
-  return `"${value.replaceAll('"', '""')}"`;
-}
 
 export async function importSqlite(file, tables, deps = {}) {
   const Database = deps.DatabaseSync ?? DatabaseSync;

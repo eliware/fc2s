@@ -10,11 +10,7 @@ import {
 } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const {
-  process: processDatasets,
-  processDate,
-  defaultDependencies,
-} = await import("../src/process.mjs");
+const { processDate, defaultDependencies } = await import("../src/process.mjs");
 
 const cfg = (exportDir) => ({
   driver: "mysql",
@@ -24,27 +20,6 @@ const cfg = (exportDir) => ({
   port: 3306,
   prefix: "P_",
   exportDir,
-});
-
-test("process selects latest, current, and all through injection", async () => {
-  const calls = [];
-  const dependencies = {
-    availableDates: async () => ["2025-03-01", "2025-02-01", "2025-01-01"],
-    processDate: async (date) => {
-      calls.push(date);
-      return date;
-    },
-  };
-  await expect(processDatasets("latest", {}, dependencies)).resolves.toEqual(["2025-03-01"]);
-  await expect(processDatasets("current", {}, dependencies)).resolves.toEqual(["2025-02-01"]);
-  await expect(processDatasets("all", {}, dependencies)).resolves.toEqual([
-    "2025-01-01",
-    "2025-02-01",
-    "2025-03-01",
-  ]);
-  expect(calls).toHaveLength(5);
-  const noDates = { availableDates: async () => [] };
-  await expect(processDatasets("latest", {}, noDates)).rejects.toThrow("No FAA dates");
 });
 
 test("processDate orchestrates and cleans successful work", async () => {
@@ -163,19 +138,6 @@ test("processDate cleans staging after archive and work cleanup failures", async
   ]);
   removeTree(root);
 });
-test("process applies default arguments with injected date processing", async () => {
-  const calls = [];
-  const dependencies = {
-    availableDates: async () => ["2025-03-01"],
-    processDate: async (date) => {
-      calls.push(date);
-      return date;
-    },
-  };
-  expect(await processDatasets(undefined, undefined, dependencies)).toEqual(["2025-03-01"]);
-  expect(calls).toEqual(["2025-03-01"]);
-});
-
 test("processDate applies default overrides with injected dependencies", async () => {
   const root = makeDirectory("fc2s-process-");
   let size = 1;
@@ -233,7 +195,6 @@ test("processDate ends connection and cleans work when SQL fails", async () => {
 test("default dependency container is fully replaceable for isolated runs", async () => {
   const root = makeDirectory("fc2s-process-");
   const original = { ...defaultDependencies };
-  const calls = [];
   Object.assign(defaultDependencies, {
     config: () => cfg(root),
     tempDir: async () => "/tmp/work",
@@ -246,51 +207,11 @@ test("default dependency container is fully replaceable for isolated runs", asyn
     tarGz: async () => {},
     stat: async () => ({ size: 1 }),
     rm: async () => {},
-    availableDates: async () => ["2025-01-02"],
-    processDate: async (date) => {
-      calls.push(date);
-      return date;
-    },
   });
   try {
     await expect(processDate("2025-01-02", undefined, undefined)).resolves.toBe(
       path.join(root, "P_2025_01_02.sql.tar.gz"),
     );
-    await expect(processDatasets()).resolves.toEqual(["2025-01-02"]);
-    expect(calls).toEqual(["2025-01-02"]);
-  } finally {
-    delete defaultDependencies.processDate;
-    Object.assign(defaultDependencies, original);
-    removeTree(root);
-  }
-});
-
-test("process uses injected defaults when processDate is omitted", async () => {
-  const root = makeDirectory("fc2s-process-");
-  const original = { ...defaultDependencies };
-  Object.assign(defaultDependencies, {
-    config: () => cfg(root),
-    tempDir: async () => "/tmp/work",
-    mkdir: async () => {},
-    download: async () => {},
-    extract: async () => {},
-    schema: async () => [],
-    db: async () => ({ query: async () => {}, end: async () => {} }),
-    dumpTable: async () => {},
-    tarGz: async () => {},
-    stat: async () => ({ size: 1 }),
-    rm: async () => {},
-  });
-  try {
-    await expect(
-      processDatasets(
-        "latest",
-        {},
-        {
-          availableDates: async () => ["2025-01-02"],
-        },
-      ),
-    ).resolves.toEqual([path.join(root, "P_2025_01_02.sql.tar.gz")]);
   } finally {
     Object.assign(defaultDependencies, original);
     removeTree(root);
