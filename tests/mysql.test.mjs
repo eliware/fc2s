@@ -8,7 +8,7 @@ import {
 } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { db, dumpTable, run } = await import("../src/mysql.mjs");
+const { db, dumpTable } = await import("../src/mysql.mjs");
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const p = new EventEmitter();
@@ -49,27 +49,6 @@ test("db uses injected mysql client and stream factory", async () => {
 test("db keeps TLS optional when no CA is configured", () => {
   const mysql = { createConnection: (options) => options };
   expect(db({ host: "h", port: 1, user: "u", password: "p" }, { mysql })).not.toHaveProperty("ssl");
-});
-
-test("run captures output and injected spawn failures", async () => {
-  await expect(run("x", [], {}, { spawn: () => child({ output: "ok" }) })).resolves.toBe("ok");
-  await expect(run("x", [], {}, { spawn: () => child({ error: "bad", code: 2 }) })).rejects.toThrow(
-    "bad",
-  );
-  const failing = new EventEmitter();
-  await expect(
-    run(
-      "x",
-      [],
-      {},
-      {
-        spawn: () => {
-          queueMicrotask(() => failing.emit("error", new Error("spawn failed")));
-          return failing;
-        },
-      },
-    ),
-  ).rejects.toThrow("spawn failed");
 });
 
 test("dumpTable uses injected process and pipeline", async () => {
@@ -137,18 +116,6 @@ test("dumpTable reports injected command failure", async () => {
   ).rejects.toThrow("dump failed");
 });
 
-test("run uses fallback command error when stderr is empty", async () => {
-  await expect(run("x", [], {}, { spawn: () => child({ code: 2 }) })).rejects.toThrow(
-    "command failed: 2",
-  );
-});
-
-test("run handles children without output streams", async () => {
-  const p = new EventEmitter();
-  queueMicrotask(() => p.emit("close", 0));
-  await expect(run("x", [], {}, { spawn: () => p })).resolves.toBe("");
-});
-
 test("dumpTable uses fallback error when stderr is empty", async () => {
   await expect(
     dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", "x", {
@@ -169,10 +136,6 @@ test("db uses default read stream dependency", async () => {
   const stream = options.infileStreamFactory("/workspace/mysql-input");
   expect(stream).toBeDefined();
   stream.destroy();
-});
-
-test("run uses the default spawn implementation", async () => {
-  await expect(run("fake-output", [])).resolves.toBe("ok");
 });
 
 test("dumpTable uses default pipeline and write stream", async () => {

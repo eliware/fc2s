@@ -76,24 +76,43 @@ test("processDate orchestrates and cleans successful work", async () => {
   removeTree(root);
 });
 
-test("SQLite processing writes the SQLite suffix and cleans its working directory", async () => {
+test("processDate selects SQLite import, archives it, and removes staging", async () => {
   const root = makeDirectory("process-sqlite");
   const exportDir = path.join(root, "exports");
   const input = path.join(root, "TEST.csv");
-  putFile(input, "ID,NAME\n001,Airport\n");
+  const imported = [];
+  const compressed = [];
   const dependencies = {
     config: () => ({ driver: "sqlite", prefix: "P_", exportDir }),
     tempDir: async () => makeDirectory("process-sqlite-work"),
     download: async () => {},
     extract: async () => {},
     schema: async () => [{ table: "TEST", csv: input, columns: [] }],
-    importSqlite: async (file) => putFile(file, "SQLite database"),
-    gzipFile: async (inputFile, output) => putFile(output, getFile(inputFile)),
+    importSqlite: async (file, tables) => {
+      imported.push({ file, tables });
+      putFile(file, "SQLite database");
+    },
+    gzipFile: async (inputFile, output) => {
+      compressed.push({ inputFile, output });
+      putFile(output, getFile(inputFile));
+    },
     stat: async (file) => fileInfo(file),
   };
 
   const archive = await processDate("2025-01-02", {}, dependencies);
   expect(archive).toBe(path.join(exportDir, "P_2025_01_02.sqlite.gz"));
+  expect(imported).toEqual([
+    {
+      file: path.join(exportDir, "P_2025_01_02", "P_2025_01_02.sqlite"),
+      tables: [{ table: "TEST", csv: input, columns: [] }],
+    },
+  ]);
+  expect(compressed).toEqual([
+    {
+      inputFile: path.join(exportDir, "P_2025_01_02", "P_2025_01_02.sqlite"),
+      output: archive,
+    },
+  ]);
   expect(getFile(archive, "utf8")).toBe("SQLite database");
   expect(fileExists(path.join(exportDir, "P_2025_01_02"))).toBe(false);
   removeTree(root);
