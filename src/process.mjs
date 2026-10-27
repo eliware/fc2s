@@ -1,37 +1,12 @@
 import path from "node:path";
-import { mkdir as defaultMkdir, stat as defaultStat } from "node:fs/promises";
-import { config as defaultConfig } from "./config.mjs";
-import { availableDates as defaultAvailableDates, dataUrl } from "./fetch-faa.mjs";
-import {
-  tempDir as defaultTempDir,
-  download as defaultDownload,
-  extract as defaultExtract,
-  rm as defaultRm,
-} from "./files.mjs";
-import { schema as defaultSchema, identifier } from "./schema.mjs";
-import { db as defaultDb, dumpTable as defaultDumpTable } from "./mysql.mjs";
-import { importSqlite as defaultImportSqlite } from "./sqlite.mjs";
-import { gzipFile as defaultGzipFile, tarGz as defaultTarGz } from "./archive.mjs";
+import { dataUrl } from "./fetch-faa.mjs";
+import { identifier } from "./schema.mjs";
 import { log } from "./debug.mjs";
 import { createProcess } from "./process/selector.mjs";
 import { cleanupProcess } from "./process/cleanup.mjs";
+import { defaultDependencies } from "./process/dependencies.mjs";
 
-export const defaultDependencies = {
-  config: defaultConfig,
-  mkdir: defaultMkdir,
-  stat: defaultStat,
-  tempDir: defaultTempDir,
-  download: defaultDownload,
-  extract: defaultExtract,
-  rm: defaultRm,
-  schema: defaultSchema,
-  db: defaultDb,
-  dumpTable: defaultDumpTable,
-  tarGz: defaultTarGz,
-  availableDates: defaultAvailableDates,
-  importSqlite: defaultImportSqlite,
-  gzipFile: defaultGzipFile,
-};
+export { defaultDependencies };
 
 export async function processDate(date, overrides = {}, dependencies = {}) {
   const d = { ...defaultDependencies, ...dependencies };

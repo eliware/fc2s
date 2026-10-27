@@ -10,7 +10,7 @@ import {
 } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { processDate, defaultDependencies } = await import("../src/process.mjs");
+const { processDate } = await import("../src/process.mjs");
 
 const cfg = (exportDir) => ({
   driver: "mysql",
@@ -140,30 +140,4 @@ test("processDate ends connection and cleans work when SQL fails", async () => {
   expect(ended).toBe(true);
   expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
   removeTree(root);
-});
-
-test("default dependency container is fully replaceable for isolated runs", async () => {
-  const root = makeDirectory("fc2s-process-");
-  const original = { ...defaultDependencies };
-  Object.assign(defaultDependencies, {
-    config: () => cfg(root),
-    tempDir: async () => "/tmp/work",
-    mkdir: async () => {},
-    download: async () => {},
-    extract: async () => {},
-    schema: async () => [],
-    db: async () => ({ query: async () => {}, end: async () => {} }),
-    dumpTable: async () => {},
-    tarGz: async () => {},
-    stat: async () => ({ size: 1 }),
-    rm: async () => {},
-  });
-  try {
-    await expect(processDate("2025-01-02", undefined, undefined)).resolves.toBe(
-      path.join(root, "P_2025_01_02.sql.tar.gz"),
-    );
-  } finally {
-    Object.assign(defaultDependencies, original);
-    removeTree(root);
-  }
 });

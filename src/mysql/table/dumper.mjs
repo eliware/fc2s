@@ -1,7 +1,7 @@
 import { spawn as defaultSpawn } from "node:child_process";
-import { waitForExit } from "../commands/runner.mjs";
-import { dumpCommand } from "./dump/command.mjs";
-import { writeDump } from "./dump/writer.mjs";
+import { waitForExit } from "../../commands/runner.mjs";
+import { dumpCommand } from "../dump/command.mjs";
+import { writeDump } from "../dump/writer.mjs";
 
 export async function dumpTable(config, database, table, file, deps = {}) {
   const spawn = deps.spawn ?? defaultSpawn;

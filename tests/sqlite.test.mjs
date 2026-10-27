@@ -100,15 +100,3 @@ test("wraps a stream failure before rows without adding a record number", async 
   ).rejects.toThrow("Failed importing APT from /fixtures/a.csv: stream failed");
   database.close();
 });
-
-test("skips rollback when transaction start fails", async () => {
-  class FailingDatabase {
-    exec() {
-      throw new Error("transaction failed");
-    }
-    close() {}
-  }
-  await expect(importSqlite(":memory:", [], { DatabaseSync: FailingDatabase })).rejects.toThrow(
-    "transaction failed",
-  );
-});

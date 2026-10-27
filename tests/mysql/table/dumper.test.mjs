@@ -4,11 +4,11 @@ import {
   makeDirectory,
   mockEffects,
   removeTree,
-} from "../../test-fixtures/mock-effects.mjs";
+} from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { dumpTable } = await import("../../src/mysql/table-dumper.mjs");
-const { dumpTable: dumpThroughFacade } = await import("../../src/mysql.mjs");
+const { dumpTable } = await import("../../../src/mysql/table/dumper.mjs");
+const { dumpTable: dumpThroughFacade } = await import("../../../src/mysql.mjs");
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const p = new EventEmitter();

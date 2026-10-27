@@ -1,16 +1,12 @@
 import { DatabaseSync } from "node:sqlite";
 import { quoteIdentifier } from "./sqlite/identifier.mjs";
 import { readCsvRows } from "./sqlite/csv-reader.mjs";
+import { transaction } from "./sqlite/transaction.mjs";
 
 export async function importSqlite(file, tables, deps = {}) {
   const Database = deps.DatabaseSync ?? DatabaseSync;
   const database = new Database(file);
-  let inTransaction = false;
-
-  try {
-    database.exec("PRAGMA journal_mode = DELETE; PRAGMA synchronous = FULL; BEGIN IMMEDIATE;");
-    inTransaction = true;
-
+  await transaction(database, async () => {
     for (const table of tables) {
       const names = table.columns.map((column) => quoteIdentifier(column.name, true));
       const definitions = table.columns.map(
@@ -39,19 +35,5 @@ export async function importSqlite(file, tables, deps = {}) {
         );
       }
     }
-
-    database.exec("COMMIT;");
-    inTransaction = false;
-  } catch (error) {
-    if (inTransaction) {
-      try {
-        database.exec("ROLLBACK;");
-      } catch {
-        /* Preserve the import error. */
-      }
-    }
-    throw error;
-  } finally {
-    database.close();
-  }
+  });
 }
