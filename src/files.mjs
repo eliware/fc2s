@@ -1,28 +1,17 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { log, step } from "./debug.mjs";
-export { extract } from "./files/extractor.mjs";
+import { mkdir, readFile, rm } from "node:fs/promises";
+import { extract as extractImpl } from "./files/extractor.mjs";
+import { download as downloadImpl, tempDir as tempDirImpl } from "./files/transfer.mjs";
 
-export async function tempDir() {
-  const directory = await mkdtemp(path.join(tmpdir(), "fc2s-"));
-  log("temporary directory", directory);
-  return directory;
+export function extract(...args) {
+  return extractImpl(...args);
 }
 
-export async function download(url, file) {
-  return step(`download ${url}`, async () => {
-    const response = await fetch(url);
-    log("HTTP response", {
-      url,
-      status: response.status,
-      headers: Object.fromEntries(response.headers),
-    });
-    if (!response.ok) throw new Error(`Download HTTP ${response.status}`);
-    const data = Buffer.from(await response.arrayBuffer());
-    await writeFile(file, data);
-    log("downloaded", { file, bytes: data.length });
-  });
+export function download(...args) {
+  return downloadImpl(...args);
 }
 
-export { readFile, rm, mkdir };
+export function tempDir(...args) {
+  return tempDirImpl(...args);
+}
+
+export { mkdir, readFile, rm };
