@@ -1,4 +1,4 @@
-# Examples
+# Command line tools
 
 - [Basic configuration](basic.mjs)
 - [Database dump](dump_db.mjs)

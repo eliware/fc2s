@@ -1,4 +1,5 @@
 import { process as runProcess } from "../src/process.mjs";
+
 try {
   console.log((await runProcess("current")).join("\n"));
 } catch (e) {

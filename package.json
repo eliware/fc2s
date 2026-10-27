@@ -18,7 +18,7 @@
   "private": true,
   "files": [
     "src/",
-    "examples/",
+    "bin/",
     "docs/",
     "specs/",
     "README.md",
@@ -29,7 +29,9 @@
     "package.json"
   ],
   "scripts": {
-    "latest": "node examples/get_latest.mjs",
+    "current": "node bin/get_current.mjs",
+    "latest": "node bin/get_latest.mjs",
+    "get:dates": "node bin/list_dates.mjs",
     "test": "eliware-test",
     "lint": "eliware-test --lint",
     "audit": "eliware-test --audit",

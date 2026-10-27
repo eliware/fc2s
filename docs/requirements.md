@@ -32,21 +32,13 @@ SQLite writes `<db_name>.sqlite.gz`, which decompresses to one SQLite database f
 
 The application validates the completed output and removes temporary working files after success.
 
-## Examples
+## Command line
 
-Run `node examples/get_current.mjs` for the current FAA dataset.
-
-Run `node examples/get_latest.mjs` for the latest published dataset.
-
-Run `node examples/get_all.mjs` for all available datasets.
-
-Run `node examples/get_date.mjs YYYY-MM-DD` for one specified dataset date.
-
-Run `node examples/list_dates.mjs` to print FAA dataset dates.
-
-Run `node examples/get_sqlite_current.mjs` to select SQLite for the current dataset.
-
-The selected driver applies to examples unless an example selects SQLite directly.
+Run `node bin/get_current.mjs` for the current dataset, `node bin/get_latest.mjs` for the latest,
+or `node bin/get_all.mjs` for all available datasets. Run `node bin/get_date.mjs YYYY-MM-DD` for
+one date. Add `--verbose` to show detailed logs. Use `node bin/get_sqlite_current.mjs` to select
+SQLite directly, or `node bin/list_dates.mjs` to list FAA release dates. `node bin/dump_db.mjs
+<db_name>` exports an existing MySQL database.
 
 ## Safety
 

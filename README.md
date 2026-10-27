@@ -43,9 +43,10 @@ Set `DB_DRIVER=mysql` for MySQL or `DB_DRIVER=sqlite` for SQLite.
 
 ## Usage
 
-Run `node examples/get_current.mjs` to import the current dataset.
-Run `node examples/get_latest.mjs` for the latest dataset, or `node examples/get_all.mjs` for all available datasets.
-Read [usage documentation](docs/usage.md), [examples](examples/README.md), and [release notes](RELEASE_NOTES.md).
+Run `npm run get:dates` to list FAA release dates.
+Run `npm run current` or `npm run latest` to import using the driver set in `.env`.
+Run `node bin/get_all.mjs` to import all available datasets.
+Read [usage documentation](docs/usage.md), [command line tools](bin/README.md), and [release notes](RELEASE_NOTES.md).
 
 ## Development
 
@@ -78,7 +79,7 @@ Store MySQL credentials in the local `.env` file. SQLite runs without database c
 
 ## Operations
 
-The examples import current, latest, date-specific, or all datasets.
+The CLI imports current, latest, date-specific, or all datasets.
 MySQL output is `exports/<db_name>.sql.tar.gz` with one SQL file for each table.
 SQLite output is `exports/<db_name>.sqlite.gz` with one compressed database file.
 See [usage documentation](docs/usage.md) for commands and output details.

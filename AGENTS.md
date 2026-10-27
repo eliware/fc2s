@@ -10,8 +10,8 @@ Keep behavior requirements in docs/requirements.md. Keep usage instructions in R
 
 ## Layout
 
-Keep implementation modules in src/, executable examples in examples/, and tests in tests/.
-Use docs/README.md, examples/README.md, and specs/README.md to find maintained files.
+Keep implementation modules in src/, launchers in bin/, and tests in tests/.
+Use docs/README.md, bin/README.md, and specs/README.md to find maintained files.
 
 ## Development
 

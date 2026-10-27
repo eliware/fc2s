@@ -1,13 +1,14 @@
 import { HOME_PAGE, availableDates, dataUrl, parseDates } from "../src/fetch-faa.mjs";
 
 test("parseDates returns unique newest-first ISO dates", () => {
-  expect(parseDates("Preview: January 2, 2025; January 2, 2025; March 10, 2024")).toEqual([
-    "2025-01-02",
-    "2024-03-10",
-  ]);
+  expect(
+    parseDates(
+      "Preview: Subscription effective January 2, 2025; Subscription effective January 2, 2025; Archives: Subscription effective March 10, 2024; Page last modified: January 3, 2025",
+    ),
+  ).toEqual(["2025-01-02", "2024-03-10"]);
 });
 test("parseDates ignores invalid calendar dates", () => {
-  expect(parseDates("Fakemonth 31, 2025")).toEqual([]);
+  expect(parseDates("Subscription effective Fakemonth 31, 2025")).toEqual([]);
 });
 
 test("dataUrl formats FAA date", () => {
@@ -19,7 +20,10 @@ test("dataUrl rejects invalid date", () => {
 
 test("availableDates fetches and parses page", async () => {
   const old = globalThis.fetch;
-  globalThis.fetch = async () => ({ ok: true, text: async () => "April 1, 2025" });
+  globalThis.fetch = async () => ({
+    ok: true,
+    text: async () => "Subscription effective April 1, 2025",
+  });
   await expect(availableDates("x")).resolves.toEqual(["2025-04-01"]);
   globalThis.fetch = old;
 });
@@ -28,7 +32,7 @@ test("availableDates uses FAA home page by default", async () => {
   const old = globalThis.fetch;
   globalThis.fetch = async (url) => {
     expect(url).toBe(HOME_PAGE);
-    return { ok: true, text: async () => "April 1, 2025" };
+    return { ok: true, text: async () => "Subscription effective April 1, 2025" };
   };
   await expect(availableDates()).resolves.toEqual(["2025-04-01"]);
   globalThis.fetch = old;

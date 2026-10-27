@@ -1,12 +1,14 @@
 import { config } from "../src/config.mjs";
 
 test("config accepts overrides", () => {
-  expect(config({ host: "h", user: "u", password: "p", port: 3307 }).port).toBe(3307);
+  expect(config({ driver: "mysql", host: "h", user: "u", password: "p", port: 3307 }).port).toBe(
+    3307,
+  );
 });
 test("config requires credentials", () => {
-  expect(() => config({ host: undefined, user: undefined, password: undefined })).toThrow(
-    "Missing MYSQL_",
-  );
+  expect(() =>
+    config({ driver: "mysql", host: undefined, user: undefined, password: undefined }),
+  ).toThrow("Missing MYSQL_");
 });
 
 test("config uses environment defaults and overrides optional values", () => {
@@ -15,6 +17,7 @@ test("config uses environment defaults and overrides optional values", () => {
   process.env.MYSQL_USERNAME = "env-user";
   process.env.MYSQL_PASSWORD = "env-pass";
   process.env.MYSQL_PORT = "3308";
+  process.env.DB_DRIVER = "mysql";
   process.env.MYSQL_SSL_CA = "/ca.pem";
   process.env.NASR_PREFIX = "X_";
   process.env.EXPORT_DIR = "/tmp/x";
@@ -31,7 +34,7 @@ test("config uses environment defaults and overrides optional values", () => {
 });
 
 test.each(["host", "user", "password"])("config reports missing %s", (key) => {
-  const values = { host: "h", user: "u", password: "p", sslCa: "/ca.pem" };
+  const values = { driver: "mysql", host: "h", user: "u", password: "p", sslCa: "/ca.pem" };
   values[key] = undefined;
   expect(() => config(values)).toThrow(
     `Missing MYSQL_${key === "host" ? "HOSTNAME" : key === "user" ? "USERNAME" : "PASSWORD"}`,
@@ -41,6 +44,7 @@ test.each(["host", "user", "password"])("config reports missing %s", (key) => {
 test("config applies optional defaults", () => {
   const saved = { ...process.env };
   for (const key of [
+    "DB_DRIVER",
     "MYSQL_HOSTNAME",
     "MYSQL_USERNAME",
     "MYSQL_PASSWORD",
@@ -61,7 +65,7 @@ test("config applies optional defaults", () => {
 test("MySQL config allows TLS to remain unconfigured", () => {
   const saved = { ...process.env };
   delete process.env.MYSQL_SSL_CA;
-  expect(config({ host: "h", user: "u", password: "p" }).sslCa).toBeUndefined();
+  expect(config({ driver: "mysql", host: "h", user: "u", password: "p" }).sslCa).toBeUndefined();
   process.env = saved;
 });
 

@@ -6,7 +6,7 @@ import { tarGz } from "../src/archive.mjs";
 
 const dbName = globalThis.process.argv[2];
 if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
-  console.error("Usage: node examples/dump_db.mjs <db_name>");
+  console.error("Usage: node bin/dump_db.mjs <db_name>");
   globalThis.process.exitCode = 1;
 } else {
   const c = config();

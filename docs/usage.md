@@ -18,18 +18,18 @@ Select the storage backend with `DB_DRIVER`:
   MySQL server or credentials are required.
 
 Both backends use `NASR_PREFIX` (default `NASR_`) and `EXPORT_DIR` (default
-`./exports`). Run `node examples/get_current.mjs`, `node
-examples/get_latest.mjs`, or `node examples/get_all.mjs`. The dedicated SQLite
-current-dataset example is `node examples/get_sqlite_current.mjs`.
+`./exports`).
+
+Set `DB_DRIVER` in `.env` to `mysql` or `sqlite`. Run `npm run get:dates` to list available FAA
+release dates. Run `npm run current` or `npm run latest` to import with the selected driver.
+Run `node bin/get_all.mjs` for every available dataset, or
+`node bin/get_date.mjs YYYY-MM-DD` for one date. Run `node bin/dump_db.mjs <db_name>` to dump
+an existing MySQL database.
 
 The SQLite backend uses Node's built-in `node:sqlite` module and requires Node
 26 or newer. Its schema declares FAA fields as `TEXT` so values such as
 zero-padded identifiers and decimal strings keep their source representation.
 
-Run `node examples/get_date.mjs YYYY-MM-DD` to import one date. Run
-`node examples/list_dates.mjs` to list dates published by FAA. Run
-`node examples/dump_db.mjs <db_name>` to export an existing MySQL database.
-
-Run `node examples/check_mysql_tls.mjs` to verify TLS connection and dump behavior, reject
-an invalid CA and server host name, and import a local CSV using `LOAD DATA LOCAL INFILE`. The
-check creates and removes a temporary `NASR_` database.
+Run `node bin/check_mysql_tls.mjs` to verify TLS, reject an invalid CA and host name, import a
+local CSV with `LOAD DATA LOCAL INFILE`, and dump the table. This check creates and removes a
+temporary `NASR_` database.
