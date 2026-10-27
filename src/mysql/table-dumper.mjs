@@ -1,30 +1,11 @@
 import { spawn as defaultSpawn } from "node:child_process";
-import { createWriteStream as defaultCreateWriteStream } from "node:fs";
-import { pipeline as defaultPipeline } from "node:stream/promises";
+import { dumpCommand } from "./dump/command.mjs";
+import { writeDump } from "./dump/writer.mjs";
 
 export async function dumpTable(config, database, table, file, deps = {}) {
   const spawn = deps.spawn ?? defaultSpawn;
-  const pipeline = deps.pipeline ?? defaultPipeline;
-  const createWriteStream = deps.createWriteStream ?? defaultCreateWriteStream;
-  const child = spawn(
-    "mysqldump",
-    [
-      "--no-defaults",
-      "--password",
-      "--single-transaction",
-      "--skip-comments",
-      "--host",
-      config.host,
-      "--port",
-      String(config.port),
-      "--user",
-      config.user,
-      ...(config.sslCa ? ["--ssl", "--ssl-ca", config.sslCa, "--ssl-verify-server-cert"] : []),
-      database,
-      table,
-    ],
-    { stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, MYSQL_PWD: "", MARIADB_PWD: "" } },
-  );
+  const { command, args, options } = dumpCommand(config, database, table);
+  const child = spawn(command, args, options);
   child.stdin.end(`${config.password}\n`);
   let errorOutput = "";
   child.stderr.on("data", (chunk) => {
@@ -37,5 +18,5 @@ export async function dumpTable(config, database, table, file, deps = {}) {
       else resolve();
     });
   });
-  await Promise.all([exited, pipeline(child.stdout, createWriteStream(file))]);
+  await Promise.all([exited, writeDump(child, file, deps)]);
 }

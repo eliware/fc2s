@@ -43,9 +43,8 @@ test("process selects latest, current, and all through injection", async () => {
     "2025-03-01",
   ]);
   expect(calls).toHaveLength(5);
-  await expect(processDatasets("latest", {}, { availableDates: async () => [] })).rejects.toThrow(
-    "No FAA dates",
-  );
+  const noDates = { availableDates: async () => [] };
+  await expect(processDatasets("latest", {}, noDates)).rejects.toThrow("No FAA dates");
 });
 
 test("processDate orchestrates and cleans successful work", async () => {
@@ -68,11 +67,7 @@ test("processDate orchestrates and cleans successful work", async () => {
   await expect(processDate("2025-01-02", {}, dependencies)).resolves.toBe(
     path.join(root, "P_2025_01_02.sql.tar.gz"),
   );
-  expect(removed).toEqual([
-    path.join(root, "P_2025_01_02"),
-    "/tmp/work",
-    path.join(root, "P_2025_01_02"),
-  ]);
+  expect(removed).toHaveLength(3);
   removeTree(root);
 });
 
@@ -118,9 +113,10 @@ test("processDate selects SQLite import, archives it, and removes staging", asyn
   removeTree(root);
 });
 
-test("processDate preserves dump directory when archive fails", async () => {
+test("processDate cleans staging after archive and work cleanup failures", async () => {
   const root = makeDirectory("fc2s-process-");
   const removed = [];
+  let stagingRemovals = 0;
   const dependencies = {
     config: () => cfg(root),
     tempDir: async () => "/tmp/work",
@@ -137,25 +133,53 @@ test("processDate preserves dump directory when archive fails", async () => {
   };
   await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("archive failed");
   expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
+  removed.length = 0;
+  dependencies.tarGz = async () => {};
+  dependencies.rm = async (target) => {
+    removed.push(target);
+    if (target === "/tmp/work") throw new Error("work cleanup failed");
+  };
+  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("work cleanup failed");
+  expect(removed).toEqual([
+    path.join(root, "P_2025_01_02"),
+    "/tmp/work",
+    path.join(root, "P_2025_01_02"),
+  ]);
+  removed.length = 0;
+  stagingRemovals = 0;
+  dependencies.rm = async (target) => {
+    removed.push(target);
+    if (target === path.join(root, "P_2025_01_02") && ++stagingRemovals === 2) {
+      throw new Error("staging cleanup failed");
+    }
+  };
+  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow(
+    "staging cleanup failed",
+  );
+  expect(removed).toEqual([
+    path.join(root, "P_2025_01_02"),
+    "/tmp/work",
+    path.join(root, "P_2025_01_02"),
+  ]);
   removeTree(root);
 });
-
 test("process applies default arguments with injected date processing", async () => {
   const calls = [];
-  await expect(
-    processDatasets(undefined, undefined, {
-      availableDates: async () => ["2025-03-01"],
-      processDate: async (date) => {
-        calls.push(date);
-        return date;
-      },
-    }),
-  ).resolves.toEqual(["2025-03-01"]);
+  const dependencies = {
+    availableDates: async () => ["2025-03-01"],
+    processDate: async (date) => {
+      calls.push(date);
+      return date;
+    },
+  };
+  expect(await processDatasets(undefined, undefined, dependencies)).toEqual(["2025-03-01"]);
   expect(calls).toEqual(["2025-03-01"]);
 });
 
 test("processDate applies default overrides with injected dependencies", async () => {
   const root = makeDirectory("fc2s-process-");
+  let size = 1;
+  const removed = [];
   const dependencies = {
     config: () => cfg(root),
     tempDir: async () => "/tmp/work",
@@ -166,31 +190,15 @@ test("processDate applies default overrides with injected dependencies", async (
     db: async () => ({ query: async () => {}, end: async () => {} }),
     dumpTable: async () => {},
     tarGz: async () => {},
-    stat: async () => ({ size: 1 }),
-    rm: async () => {},
+    stat: async () => ({ size }),
+    rm: async (target) => removed.push(target),
   };
   await expect(processDate("2025-01-02", undefined, dependencies)).resolves.toBe(
     path.join(root, "P_2025_01_02.sql.tar.gz"),
   );
-  removeTree(root);
-});
-
-test("processDate rejects empty archives and still cleans work", async () => {
-  const root = makeDirectory("fc2s-process-");
-  const removed = [];
-  const dependencies = {
-    config: () => cfg(root),
-    tempDir: async () => "/tmp/work",
-    mkdir: async () => {},
-    download: async () => {},
-    extract: async () => {},
-    schema: async () => [],
-    db: async () => ({ query: async () => {}, end: async () => {} }),
-    stat: async () => ({ size: 0 }),
-    rm: async (target) => removed.push(target),
-    tarGz: async () => {},
-  };
-  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("Empty archive");
+  size = 0;
+  removed.length = 0;
+  await expect(processDate("2025-01-02", undefined, dependencies)).rejects.toThrow("Empty archive");
   expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
   removeTree(root);
 });

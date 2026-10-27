@@ -61,6 +61,8 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
   const work = await tempDir();
   const dumpDir = path.join(c.exportDir, dbName);
   let archived = false;
+  let result;
+  let operationError;
   try {
     await mkdir(c.exportDir, { recursive: true });
     const zip = path.join(work, "data.zip");
@@ -94,11 +96,27 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
     }
     if ((await stat(archive)).size === 0) throw new Error("Empty archive");
     archived = true;
-    return archive;
-  } finally {
-    await rm(work, { recursive: true, force: true });
-    if (archived) await rm(dumpDir, { recursive: true, force: true });
+    result = archive;
+  } catch (error) {
+    operationError = error;
   }
+
+  let cleanupError;
+  try {
+    await rm(work, { recursive: true, force: true });
+  } catch (error) {
+    cleanupError = error;
+  }
+  if (archived) {
+    try {
+      await rm(dumpDir, { recursive: true, force: true });
+    } catch (error) {
+      cleanupError ??= error;
+    }
+  }
+  if (operationError) throw operationError;
+  if (cleanupError) throw cleanupError;
+  return result;
 }
 
 export async function process(mode = "current", overrides = {}, dependencies = {}) {

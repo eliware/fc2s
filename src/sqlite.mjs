@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { identifier } from "./schema/sql-builder.mjs";
+import { identifier } from "./schema/identifier.mjs";
 import { readCsvRows } from "./sqlite/csv-reader.mjs";
 
 function quoteIdentifier(value, isColumn = false) {
@@ -34,7 +34,7 @@ export async function importSqlite(file, tables, deps = {}) {
       try {
         for await (const { record, rowNumber } of readCsvRows(
           table.csv,
-          table.columns.length,
+          table.columns.map((column) => column.name),
           deps,
         )) {
           currentRecord = rowNumber;

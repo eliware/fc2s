@@ -1,12 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { buildTable, identifier } = await import("../../src/schema/sql-builder.mjs");
-
-test("identifier accepts safe names and rejects unsafe names", () => {
-  expect(identifier("AIRPORT")).toBe("`AIRPORT`");
-  expect(() => identifier("bad-name")).toThrow("Unsafe identifier");
-});
+const { buildTable } = await import("../../src/schema/sql-builder.mjs");
 
 test("builder creates MySQL columns and data-loading SQL", () => {
   const result = buildTable("AIRPORT", "/data/AIRPORT.csv", [

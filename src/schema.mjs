@@ -1,7 +1,8 @@
 import path from "node:path";
 import { log } from "./debug.mjs";
 import { csvForTable, readSchemaFiles } from "./schema/parser.mjs";
-import { buildTable, identifier } from "./schema/sql-builder.mjs";
+import { buildTable } from "./schema/sql-builder.mjs";
+import { identifier } from "./schema/identifier.mjs";
 
 export { identifier };
 

@@ -1,9 +1,6 @@
-const id = /^[A-Za-z_][A-Za-z0-9_]*$/;
+import { identifier } from "./identifier.mjs";
 
-export function identifier(value) {
-  if (!id.test(value)) throw new Error(`Unsafe identifier: ${value}`);
-  return `\`${value}\``;
-}
+export { identifier } from "./identifier.mjs";
 
 function sqlColumn(value) {
   const column = value.trim().replace(/,+$/, "").trim();
