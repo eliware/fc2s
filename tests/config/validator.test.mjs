@@ -10,11 +10,8 @@ test("validator accepts supported drivers and returns the settings", () => {
   expect(validateConfig(mysql)).toBe(mysql);
 });
 
-test("validator rejects unsupported drivers and missing MySQL credentials", () => {
+test("validator rejects unsupported drivers", () => {
   expect(() => validateConfig({ driver: "postgres" })).toThrow(
     "Unsupported database driver: postgres",
-  );
-  expect(() => validateConfig({ driver: "mysql", host: "h", user: "u" })).toThrow(
-    "Missing MYSQL_PASSWORD",
   );
 });

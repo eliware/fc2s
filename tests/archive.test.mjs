@@ -10,9 +10,16 @@ test("archive facade delegates compression and tar operations", async () => {
   await gzipFile(`${root}/input`, `${root}/output.gz`);
   const child = new EventEmitter();
   child.stderr = new EventEmitter();
-  const archive = tarGz(`${root}/output.tar.gz`, root, undefined, { spawn: () => child });
+  const spawnCalls = [];
+  const archive = tarGz(`${root}/output.tar.gz`, root, undefined, {
+    spawn: (...args) => {
+      spawnCalls.push(args);
+      return child;
+    },
+  });
   child.emit("close", 0);
   await archive;
+  expect(spawnCalls[0][0]).toBe("tar");
   expect(gzipFile).toEqual(expect.any(Function));
   expect(tarGz).toEqual(expect.any(Function));
   removeTree(root);

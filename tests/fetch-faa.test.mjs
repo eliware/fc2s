@@ -1,4 +1,4 @@
-import { HOME_PAGE, availableDates, dataUrl, parseDates } from "../src/fetch-faa.mjs";
+import { HOME_PAGE, availableDates, dataUrl, formatDates, parseDates } from "../src/fetch-faa.mjs";
 
 test("parseDates returns unique newest-first ISO dates", () => {
   expect(
@@ -9,6 +9,13 @@ test("parseDates returns unique newest-first ISO dates", () => {
 });
 test("parseDates ignores invalid calendar dates", () => {
   expect(parseDates("Subscription effective Fakemonth 31, 2025")).toEqual([]);
+});
+
+test("formatDates labels preview and current listings", () => {
+  expect(formatDates(["2026-10-29", "2026-10-01", "2026-09-03"])).toBe(
+    "2026-10-29 (preview)\n2026-10-01 (current)\n2026-09-03",
+  );
+  expect(formatDates(["2026-10-29"])).toBe("2026-10-29 (preview)");
 });
 
 test("dataUrl formats FAA date", () => {

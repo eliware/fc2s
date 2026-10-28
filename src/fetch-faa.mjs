@@ -11,6 +11,12 @@ export function parseDates(html) {
   return [...new Set(dates)].sort((a, b) => b.localeCompare(a));
 }
 
+export function formatDates(dates) {
+  return dates
+    .map((date, index) => `${date}${index === 0 ? " (preview)" : index === 1 ? " (current)" : ""}`)
+    .join("\n");
+}
+
 export function dataUrl(date) {
   const value = new Date(`${date}T00:00:00Z`);
   if (Number.isNaN(value.valueOf())) throw new Error("Invalid date");

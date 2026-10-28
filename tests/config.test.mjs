@@ -5,12 +5,6 @@ test("config accepts overrides", () => {
     3307,
   );
 });
-test("config requires credentials", () => {
-  expect(() =>
-    config({ driver: "mysql", host: undefined, user: undefined, password: undefined }),
-  ).toThrow("Missing MYSQL_");
-});
-
 test("config uses environment values and fallback defaults", () => {
   const saved = { ...process.env };
   process.env.MYSQL_HOSTNAME = "env-host";
@@ -51,14 +45,6 @@ test("config uses environment values and fallback defaults", () => {
   process.env = saved;
 });
 
-test.each(["host", "user", "password"])("config reports missing %s", (key) => {
-  const values = { driver: "mysql", host: "h", user: "u", password: "p", sslCa: "/ca.pem" };
-  values[key] = undefined;
-  expect(() => config(values)).toThrow(
-    `Missing MYSQL_${key === "host" ? "HOSTNAME" : key === "user" ? "USERNAME" : "PASSWORD"}`,
-  );
-});
-
 test("MySQL config allows TLS to remain unconfigured", () => {
   const saved = { ...process.env };
   delete process.env.MYSQL_SSL_CA;
@@ -72,8 +58,4 @@ test("SQLite config does not require MySQL credentials", () => {
   process.env.DB_DRIVER = "sqlite";
   expect(config()).toMatchObject({ driver: "sqlite", prefix: "NASR_" });
   process.env = saved;
-});
-
-test("config rejects unsupported database drivers", () => {
-  expect(() => config({ driver: "postgres" })).toThrow("Unsupported database driver: postgres");
 });

@@ -1,7 +1,7 @@
-import { availableDates } from "../src/fetch-faa.mjs";
+import { availableDates, formatDates } from "../src/fetch-faa.mjs";
 
 try {
-  console.log((await availableDates()).join("\n"));
+  console.log(formatDates(await availableDates()));
 } catch (e) {
   console.error(e.message);
   globalThis.process.exitCode = 1;

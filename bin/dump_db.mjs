@@ -1,38 +1,20 @@
-import path from "node:path";
-import { mkdir, rm, stat } from "node:fs/promises";
-import { config } from "../src/config.mjs";
-import { listTables, dumpTable } from "../src/mysql.mjs";
-import { tarGz } from "../src/archive.mjs";
+import { pathToFileURL } from "node:url";
+import { dumpDatabase } from "../src/bin/dump-db.mjs";
 
-const dbName = globalThis.process.argv[2];
-if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
-  console.error("Usage: node bin/dump_db.mjs <db_name>");
-  globalThis.process.exitCode = 1;
-} else {
-  const c = config();
-  const dumpDir = path.resolve(c.exportDir, dbName);
-  const archive = path.resolve(c.exportDir, `${dbName}.sql.tar.gz`);
-  let archived = false;
-
+export async function runDump(dbName, deps = {}) {
   try {
-    await mkdir(c.exportDir, { recursive: true });
-    await rm(dumpDir, { recursive: true, force: true });
-    await mkdir(dumpDir, { recursive: true });
-
-    const tables = await listTables(c, dbName);
-    for (const table of tables) {
-      if (!/^[A-Za-z0-9_$]+$/.test(table)) throw new Error(`Unsafe table name: ${table}`);
-      await dumpTable(c, dbName, table, path.join(dumpDir, `${table}.sql`));
-    }
-
-    await tarGz(archive, dumpDir);
-    if ((await stat(archive)).size === 0) throw new Error("Empty archive");
-    archived = true;
-    console.log(archive);
-  } catch (e) {
-    console.error(e.stack || e.message);
+    const archive = await dumpDatabase(dbName, deps);
+    (deps.log ?? console.log)(archive);
+    return archive;
+  } catch (error) {
+    (deps.error ?? console.error)(error.stack || error.message);
     globalThis.process.exitCode = 1;
-  } finally {
-    if (archived) await rm(dumpDir, { recursive: true, force: true });
   }
+}
+
+if (
+  globalThis.process.argv[1] &&
+  import.meta.url === pathToFileURL(globalThis.process.argv[1]).href
+) {
+  await runDump(globalThis.process.argv[2]);
 }
