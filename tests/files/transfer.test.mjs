@@ -1,4 +1,4 @@
-import { getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
+import { fileExists, getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
 const { download } = await import("../../src/files/transfer.mjs");
@@ -18,15 +18,46 @@ test("download rejects HTTP errors", async () => {
 
 test("download writes a successful local response", async () => {
   const oldFetch = globalThis.fetch;
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(Uint8Array.from([1, 2]));
+      controller.close();
+    },
+  });
   globalThis.fetch = async () => ({
     ok: true,
     status: 200,
     headers: new Headers(),
-    arrayBuffer: async () => Uint8Array.from([1, 2]).buffer,
+    body,
+    arrayBuffer: async () => {
+      throw new Error("Downloader should stream the response body");
+    },
   });
   try {
     await download("https://localhost/data", "/tmp/data");
     expect(getFile("/tmp/data")).toEqual(Buffer.from([1, 2]));
+  } finally {
+    globalThis.fetch = oldFetch;
+  }
+});
+
+test("download rejects when the response stream fails", async () => {
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    headers: new Headers(),
+    body: new ReadableStream({
+      start(controller) {
+        controller.error(new Error("network interrupted"));
+      },
+    }),
+  });
+  try {
+    await expect(download("https://localhost/data", "/tmp/interrupted")).rejects.toThrow(
+      "network interrupted",
+    );
+    expect(fileExists("/tmp/interrupted")).toBe(false);
   } finally {
     globalThis.fetch = oldFetch;
   }

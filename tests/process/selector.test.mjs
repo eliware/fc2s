@@ -29,6 +29,17 @@ test("process selector rejects an empty date list", async () => {
   await expect(process()).rejects.toThrow("No FAA dates");
 });
 
+test("process selector rejects unsupported modes before loading dates", async () => {
+  let dateLookups = 0;
+  const availableDates = async () => {
+    dateLookups += 1;
+    return ["2025-01-01"];
+  };
+  const process = createProcess(undefined, { availableDates });
+  await expect(process("curent")).rejects.toThrow("Unsupported process mode: curent");
+  expect(dateLookups).toBe(0);
+});
+
 test("process selector defaults to processing dates with provided overrides", async () => {
   const calls = [];
   const defaults = { availableDates: async () => ["2025-01-02"] };

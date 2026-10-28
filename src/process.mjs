@@ -9,6 +9,7 @@ import { defaultDependencies } from "./process/dependencies.mjs";
 export { defaultDependencies };
 
 export async function processDate(date, overrides = {}, dependencies = {}) {
+  const url = dataUrl(date);
   const d = { ...defaultDependencies, ...dependencies };
   const c = d.config(overrides);
   const {
@@ -44,7 +45,7 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
     await mkdir(c.exportDir, { recursive: true });
     const zip = path.join(work, "data.zip");
     const extracted = path.join(work, "data");
-    await download(dataUrl(date), zip);
+    await download(url, zip);
     await extract(zip, extracted);
     const statements = await schema(extracted);
     await rm(dumpDir, { recursive: true, force: true });

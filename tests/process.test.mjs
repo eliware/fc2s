@@ -141,3 +141,14 @@ test("processDate ends connection and cleans work when SQL fails", async () => {
   expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
   removeTree(root);
 });
+
+test("processDate rejects invalid dates before loading configuration", async () => {
+  let configCalls = 0;
+  const config = () => {
+    configCalls += 1;
+    return cfg("/workspace/exports");
+  };
+  await expect(processDate("2025-02-30", {}, { config })).rejects.toThrow("Invalid date");
+  expect(configCalls).toBe(0);
+  await expect(processDate("2025-02-30")).rejects.toThrow("Invalid date");
+});

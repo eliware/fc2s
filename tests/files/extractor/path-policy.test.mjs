@@ -7,6 +7,10 @@ test("path policy resolves entries beneath the extraction root", () => {
   expect(resolveEntry("/workspace/out", "nested/file.txt")).toBe("/workspace/out/nested/file.txt");
 });
 
+test("path policy accepts the extraction root", () => {
+  expect(resolveEntry("/workspace/out", ".")).toBe("/workspace/out");
+});
+
 test.each(["../escape.txt", "/outside.txt"])("path policy rejects %s", (entryName) => {
   expect(() => resolveEntry("/workspace/out", entryName)).toThrow("Unsafe ZIP path");
 });

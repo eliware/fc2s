@@ -2,6 +2,9 @@ import { dateDependencies } from "./date-dependencies.mjs";
 
 export function createProcess(processDate, defaults) {
   return async function process(mode = "current", overrides = {}, dependencies = {}) {
+    if (!["current", "latest", "all"].includes(mode)) {
+      throw new Error(`Unsupported process mode: ${mode}`);
+    }
     const d = { ...dateDependencies, ...defaults, ...dependencies };
     const processDateImpl = d.processDate ?? ((date) => processDate(date, overrides, d));
     const dates = await d.availableDates();

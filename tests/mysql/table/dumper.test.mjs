@@ -3,6 +3,8 @@ import {
   getFile,
   makeDirectory,
   mockEffects,
+  putFile,
+  fileExists,
   removeTree,
 } from "../../../test-fixtures/mock-effects.mjs";
 
@@ -15,6 +17,10 @@ function child({ output = "", error = "", code = 0 } = {}) {
   p.stdin = { end: (input) => (p.input = input) };
   p.stdout = new EventEmitter();
   p.stderr = new EventEmitter();
+  p.kill = () => {
+    p.emit("close", 1);
+    return true;
+  };
   queueMicrotask(() => {
     if (output) p.stdout.emit("data", output);
     if (error) p.stderr.emit("data", error);
@@ -97,6 +103,34 @@ test("dumpTable reports injected command failure", async () => {
       },
     ),
   ).rejects.toThrow("dump failed");
+});
+
+test("dumpTable kills the child and removes partial output when writing fails", async () => {
+  const root = makeDirectory("mysql-write-failure");
+  const file = `${root}/partial.sql`;
+  putFile(file, "partial");
+  let killed = false;
+  const spawn = () => {
+    const process = child();
+    process.kill = () => {
+      killed = true;
+      process.emit("close", 1);
+      return true;
+    };
+    return process;
+  };
+  await expect(
+    dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", file, {
+      spawn,
+      pipeline: async () => {
+        throw new Error("disk full");
+      },
+      createWriteStream: () => ({}),
+    }),
+  ).rejects.toThrow("disk full");
+  expect(killed).toBe(true);
+  expect(fileExists(file)).toBe(false);
+  removeTree(root);
 });
 
 test("dumpTable uses fallback error when stderr is empty", async () => {
