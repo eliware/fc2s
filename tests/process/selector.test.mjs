@@ -5,12 +5,18 @@ const { createProcess } = await import("../../src/process/selector.mjs");
 
 test("process selector selects latest, current, and all dates", async () => {
   const calls = [];
+  let active = 0;
+  let maxActive = 0;
   const process = createProcess(undefined, {
     availableDates: async () => ["2025-03-01", "2025-02-01", "2025-01-01"],
   });
   const dependencies = {
     processDate: async (date) => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
       calls.push(date);
+      await Promise.resolve();
+      active -= 1;
       return date;
     },
   };
@@ -22,6 +28,7 @@ test("process selector selects latest, current, and all dates", async () => {
     "2025-03-01",
   ]);
   expect(calls).toHaveLength(5);
+  expect(maxActive).toBe(1);
 });
 
 test("process selector rejects an empty date list", async () => {

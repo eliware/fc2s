@@ -51,7 +51,7 @@ test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
   ]);
 });
 
-test("dumpDatabase rejects unsafe table names and leaves the staging directory", async () => {
+test("dumpDatabase rejects unsafe table names and removes the staging directory", async () => {
   const removed = [];
   await expect(
     dumpDatabase("NASR", {
@@ -61,10 +61,10 @@ test("dumpDatabase rejects unsafe table names and leaves the staging directory",
       listTables: async () => ["bad-name"],
     }),
   ).rejects.toThrow("Unsafe table name: bad-name");
-  expect(removed).toEqual(["/workspace/exports/NASR"]);
+  expect(removed).toEqual(["/workspace/exports/NASR", "/workspace/exports/NASR"]);
 });
 
-test("dumpDatabase rejects empty archives and leaves staging for inspection", async () => {
+test("dumpDatabase rejects empty archives and removes staging", async () => {
   const removed = [];
   await expect(
     dumpDatabase("NASR", {
@@ -76,5 +76,5 @@ test("dumpDatabase rejects empty archives and leaves staging for inspection", as
       stat: async () => ({ size: 0 }),
     }),
   ).rejects.toThrow("Empty archive");
-  expect(removed).toEqual(["/workspace/exports/NASR"]);
+  expect(removed).toEqual(["/workspace/exports/NASR", "/workspace/exports/NASR"]);
 });

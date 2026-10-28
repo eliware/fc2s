@@ -20,3 +20,9 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
 test("dumpCommand omits TLS options without a CA", () => {
   expect(dumpCommand({ host: "h", port: 1, user: "u" }, "d", "t").args).not.toContain("--ssl");
 });
+
+test("dumpCommand rejects unsafe table identifiers", () => {
+  expect(() => dumpCommand({ host: "h", port: 1, user: "u" }, "d", "bad-name")).toThrow(
+    "Unsafe identifier: bad-name",
+  );
+});

@@ -14,8 +14,6 @@ export async function dumpDatabase(dbName, deps = {}) {
   const c = d.config();
   const dumpDir = path.resolve(c.exportDir, dbName);
   const archive = path.resolve(c.exportDir, `${dbName}.sql.tar.gz`);
-  let archived = false;
-
   try {
     await d.mkdir(c.exportDir, { recursive: true });
     await d.rm(dumpDir, { recursive: true, force: true });
@@ -29,9 +27,8 @@ export async function dumpDatabase(dbName, deps = {}) {
 
     await d.tarGz(archive, dumpDir);
     if ((await d.stat(archive)).size === 0) throw new Error("Empty archive");
-    archived = true;
     return archive;
   } finally {
-    if (archived) await d.rm(dumpDir, { recursive: true, force: true });
+    await d.rm(dumpDir, { recursive: true, force: true });
   }
 }

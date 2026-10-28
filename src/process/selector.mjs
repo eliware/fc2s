@@ -9,10 +9,12 @@ export function createProcess(processDate, defaults) {
     const processDateImpl = d.processDate ?? ((date) => processDate(date, overrides, d));
     const dates = await d.availableDates();
     if (!dates.length) throw new Error("No FAA dates");
-    const selected =
-      mode === "all"
-        ? [...dates].reverse()
-        : [mode === "latest" ? dates[0] : dates[Math.min(1, dates.length - 1)]];
-    return Promise.all(selected.map(processDateImpl));
+    if (mode === "all") {
+      const results = [];
+      for (const date of [...dates].reverse()) results.push(await processDateImpl(date));
+      return results;
+    }
+    const selected = mode === "latest" ? dates[0] : dates[Math.min(1, dates.length - 1)];
+    return [await processDateImpl(selected)];
   };
 }

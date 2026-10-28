@@ -5,7 +5,7 @@ import { log, step } from "../debug.mjs";
 import { request } from "./request.mjs";
 
 export async function download(url, file) {
-  return step(`download ${url}`, async () => {
+  return step("download", async () => {
     const response = await request(url);
     let bytes = 0;
     const body = response.body;

@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { fileExists, getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
@@ -60,5 +61,32 @@ test("download rejects when the response stream fails", async () => {
     expect(fileExists("/tmp/interrupted")).toBe(false);
   } finally {
     globalThis.fetch = oldFetch;
+  }
+});
+
+test("verbose download logs omit URL query credentials", async () => {
+  const oldFetch = globalThis.fetch;
+  const oldVerbose = process.env.FC2S_VERBOSE;
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  process.env.FC2S_VERBOSE = "1";
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    headers: new Headers(),
+    body: new ReadableStream({
+      start(controller) {
+        controller.close();
+      },
+    }),
+  });
+  try {
+    await download("https://example.test/data?token=secret", "/tmp/private-url");
+    expect(error.mock.calls.flat().join(" ")).not.toContain("secret");
+    expect(error.mock.calls.flat().join(" ")).not.toContain("example.test");
+  } finally {
+    globalThis.fetch = oldFetch;
+    if (oldVerbose === undefined) delete process.env.FC2S_VERBOSE;
+    else process.env.FC2S_VERBOSE = oldVerbose;
+    error.mockRestore();
   }
 });

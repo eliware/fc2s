@@ -12,6 +12,8 @@
 
 ### Changed
 
+- Process FAA dates in sequence to lower resource use.
+- Remove standalone database dump staging files after success or failure, reject unsafe table identifiers before spawning `mysqldump`, and omit request URLs from verbose HTTP logs.
 - Label the newest FAA date as preview and the second-newest as current in `get:dates` output.
 - Set the package and repository metadata to Eliware Test v15.0.1 conventions.
 - Update runtime requirements to Node.js 26 and use shared Eliware Test validation.

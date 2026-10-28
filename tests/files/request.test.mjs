@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
@@ -21,5 +22,24 @@ test("request rejects unsuccessful HTTP responses", async () => {
     await expect(request("https://localhost/data")).rejects.toThrow("Download HTTP 503");
   } finally {
     globalThis.fetch = oldFetch;
+  }
+});
+
+test("verbose request logs omit URL query credentials", async () => {
+  const oldFetch = globalThis.fetch;
+  const oldVerbose = process.env.FC2S_VERBOSE;
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  process.env.FC2S_VERBOSE = "1";
+  globalThis.fetch = async () => ({ ok: true, status: 200, headers: [] });
+  try {
+    await request("https://example.test/data?token=secret");
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.mock.calls[0].join(" ")).not.toContain("secret");
+    expect(error.mock.calls[0].join(" ")).not.toContain("example.test");
+  } finally {
+    globalThis.fetch = oldFetch;
+    if (oldVerbose === undefined) delete process.env.FC2S_VERBOSE;
+    else process.env.FC2S_VERBOSE = oldVerbose;
+    error.mockRestore();
   }
 });

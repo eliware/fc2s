@@ -26,9 +26,9 @@ For MySQL, FC2S drops and recreates the date-named database. It creates the tabl
 
 For SQLite, FC2S creates a local database with text columns. It imports CSV data in a transaction and compresses the finished database to `.sqlite.gz`.
 
-`latest` selects the newest listed date. `current` selects the second newest when available. It uses the only available date when the page lists one. `all` selects every listed date and starts those imports together. A date command selects one ISO date.
+`latest` selects the newest listed date. `current` selects the second newest when available. It uses the only available date when the page lists one. `all` selects every listed date and imports them sequentially, starting with the oldest. A date command selects one ISO date.
 
-Completed runs remove download, extraction, and staging files. Database and archive outputs remain. A failed run can produce an incomplete database or staging directory. Inspect these before retrying.
+Completed runs remove download, extraction, and staging files. Database and archive outputs remain. A failed date import can produce an incomplete database or staging directory. Inspect these before retrying. `dump_db.mjs` deletes its staging folder after success and after failure.
 
 ## Commands
 

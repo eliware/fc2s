@@ -50,7 +50,7 @@ node bin/dump_db.mjs DATABASE_NAME
 node bin/check_mysql_tls.mjs
 ```
 
-`get_all.mjs` starts imports for every listed date together. Use it when the host and database can run imports together. Reserve disk capacity for each run.
+`get_all.mjs` imports dates sequentially, starting with the oldest. The command processes dates in order, one at a time.
 
 `get_date.mjs` imports the given ISO date. Its optional `--verbose` flag prints progress and errors.
 
