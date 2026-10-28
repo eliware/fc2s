@@ -12,6 +12,10 @@ export async function mockEffects() {
   configured = true;
   await jest.unstable_mockModule("node:fs/promises", async () => ({ ...memoryFs.promises }));
   await jest.unstable_mockModule("node:fs", async () => ({ ...memoryFs }));
+  await jest.unstable_mockModule("node:os", async () => ({
+    ...(await jest.requireActual("node:os")),
+    tmpdir: () => "/tmp",
+  }));
   await jest.unstable_mockModule("node:child_process", async () => ({
     spawn: (command, args = []) => {
       const child = new EventEmitter();

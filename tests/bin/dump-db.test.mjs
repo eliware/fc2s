@@ -1,4 +1,5 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
+import path from "node:path";
 
 await mockEffects();
 const { dumpDatabase } = await import("../../src/bin/dump-db.mjs");
@@ -25,7 +26,8 @@ test("dump_db launcher reports usage when the database name is missing", async (
 
 test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
   const calls = [];
-  const config = { exportDir: "/workspace/exports" };
+  const exportDir = path.resolve("/workspace/exports");
+  const config = { exportDir };
   const result = await dumpDatabase("NASR", {
     config: () => config,
     mkdir: async (...args) => calls.push(["mkdir", ...args]),
@@ -38,16 +40,16 @@ test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
     tarGz: async (...args) => calls.push(["tarGz", ...args]),
     stat: async (file) => ({ size: file.endsWith("NASR.sql.tar.gz") ? 10 : 0 }),
   });
-  expect(result).toBe("/workspace/exports/NASR.sql.tar.gz");
+  expect(result).toBe(path.join(exportDir, "NASR.sql.tar.gz"));
   expect(calls).toEqual([
-    ["mkdir", "/workspace/exports", { recursive: true }],
-    ["rm", "/workspace/exports/NASR", { recursive: true, force: true }],
-    ["mkdir", "/workspace/exports/NASR", { recursive: true }],
+    ["mkdir", exportDir, { recursive: true }],
+    ["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }],
+    ["mkdir", path.join(exportDir, "NASR"), { recursive: true }],
     ["listTables", config, "NASR"],
-    ["dumpTable", config, "NASR", "APT", "/workspace/exports/NASR/APT.sql"],
-    ["dumpTable", config, "NASR", "NAV", "/workspace/exports/NASR/NAV.sql"],
-    ["tarGz", "/workspace/exports/NASR.sql.tar.gz", "/workspace/exports/NASR"],
-    ["rm", "/workspace/exports/NASR", { recursive: true, force: true }],
+    ["dumpTable", config, "NASR", "APT", path.join(exportDir, "NASR", "APT.sql")],
+    ["dumpTable", config, "NASR", "NAV", path.join(exportDir, "NASR", "NAV.sql")],
+    ["tarGz", path.join(exportDir, "NASR.sql.tar.gz"), path.join(exportDir, "NASR")],
+    ["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }],
   ]);
 });
 
@@ -55,20 +57,23 @@ test("dumpDatabase rejects unsafe table names and removes the staging directory"
   const removed = [];
   await expect(
     dumpDatabase("NASR", {
-      config: () => ({ exportDir: "/workspace/exports" }),
+      config: () => ({ exportDir: path.resolve("/workspace/exports") }),
       mkdir: async () => {},
       rm: async (target) => removed.push(target),
       listTables: async () => ["bad-name"],
     }),
   ).rejects.toThrow("Unsafe table name: bad-name");
-  expect(removed).toEqual(["/workspace/exports/NASR", "/workspace/exports/NASR"]);
+  expect(removed).toEqual([
+    path.resolve("/workspace/exports/NASR"),
+    path.resolve("/workspace/exports/NASR"),
+  ]);
 });
 
 test("dumpDatabase rejects empty archives and removes staging", async () => {
   const removed = [];
   await expect(
     dumpDatabase("NASR", {
-      config: () => ({ exportDir: "/workspace/exports" }),
+      config: () => ({ exportDir: path.resolve("/workspace/exports") }),
       mkdir: async () => {},
       rm: async (target) => removed.push(target),
       listTables: async () => [],
@@ -76,5 +81,8 @@ test("dumpDatabase rejects empty archives and removes staging", async () => {
       stat: async () => ({ size: 0 }),
     }),
   ).rejects.toThrow("Empty archive");
-  expect(removed).toEqual(["/workspace/exports/NASR", "/workspace/exports/NASR"]);
+  expect(removed).toEqual([
+    path.resolve("/workspace/exports/NASR"),
+    path.resolve("/workspace/exports/NASR"),
+  ]);
 });

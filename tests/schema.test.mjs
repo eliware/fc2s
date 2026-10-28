@@ -1,4 +1,5 @@
 import { makeDirectory, mockEffects, putFile, removeTree } from "../test-fixtures/mock-effects.mjs";
+import path from "node:path";
 
 await mockEffects();
 const { schema } = await import("../src/schema.mjs");
@@ -13,7 +14,7 @@ test("schema assembles parsed fields and generated SQL for a matching CSV", asyn
 
   const result = await schema(directory);
   expect(result).toHaveLength(1);
-  expect(result[0]).toMatchObject({ table: "TEST", csv: `${directory}/TEST.csv` });
+  expect(result[0]).toMatchObject({ table: "TEST", csv: path.join(directory, "TEST.csv") });
   expect(result[0].columns).toEqual([
     { name: "ID", mysqlName: "`ID`", mysqlType: "VARCHAR(5)", nullable: true },
     { name: "AMOUNT", mysqlName: "`AMOUNT`", mysqlType: "DECIMAL(30,10)", nullable: false },
