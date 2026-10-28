@@ -10,7 +10,7 @@ Keep user documentation in README.md and docs/. Keep behavior requirements in do
 
 ## Layout
 
-Keep implementation modules in src/, launchers in bin/, tests in tests/, fixtures in test-fixtures/, and examples in examples/. Use the README indexes in docs/, bin/, and specs/ to find maintained files.
+Keep implementation modules in src/, launchers in bin/, and tests in tests/. Keep fixtures in test-fixtures/. Use the README indexes in docs/, bin/, and specs/ to find maintained files.
 
 ## Development
 
