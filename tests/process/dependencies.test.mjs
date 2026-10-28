@@ -1,5 +1,10 @@
 import path from "node:path";
-import { makeDirectory, mockEffects, removeTree } from "../../test-fixtures/mock-effects.mjs";
+import {
+  makeDirectory,
+  mockEffects,
+  putFile,
+  removeTree,
+} from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
 const { defaultDependencies } = await import("../../src/process/dependencies.mjs");
@@ -17,7 +22,7 @@ test("default dependency container is replaceable for isolated runs", async () =
     schema: async () => [],
     db: async () => ({ query: async () => {}, end: async () => {} }),
     dumpTable: async () => {},
-    tarGz: async () => {},
+    tarGz: async (output) => putFile(output, "archive contents"),
     stat: async () => ({ size: 1 }),
     rm: async () => {},
   });

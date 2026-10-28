@@ -9,7 +9,11 @@ import {
 import { schema as defaultSchema } from "../schema.mjs";
 import { db as defaultDb, dumpTable as defaultDumpTable } from "../mysql.mjs";
 import { importSqlite as defaultImportSqlite } from "../sqlite.mjs";
-import { gzipFile as defaultGzipFile, tarGz as defaultTarGz } from "../archive.mjs";
+import {
+  atomicArchive as defaultAtomicArchive,
+  gzipFile as defaultGzipFile,
+  tarGz as defaultTarGz,
+} from "../archive.mjs";
 
 export const defaultDependencies = {
   config: defaultConfig,
@@ -23,6 +27,7 @@ export const defaultDependencies = {
   db: defaultDb,
   dumpTable: defaultDumpTable,
   tarGz: defaultTarGz,
+  atomicArchive: defaultAtomicArchive,
   importSqlite: defaultImportSqlite,
   gzipFile: defaultGzipFile,
 };

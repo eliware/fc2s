@@ -25,6 +25,7 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
     importSqlite,
     gzipFile,
     tarGz,
+    atomicArchive,
   } = d;
   log("processDate config", {
     date,
@@ -67,12 +68,17 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
     }
     const suffix = c.driver === "sqlite" ? ".sqlite.gz" : ".sql.tar.gz";
     const archive = path.join(c.exportDir, `${dbName}${suffix}`);
-    if (c.driver === "sqlite") {
-      await gzipFile(path.join(dumpDir, `${dbName}.sqlite`), archive);
-    } else {
-      await tarGz(archive, dumpDir);
-    }
-    if ((await stat(archive)).size === 0) throw new Error("Empty archive");
+    await atomicArchive(
+      archive,
+      async (temporary) => {
+        if (c.driver === "sqlite") {
+          await gzipFile(path.join(dumpDir, `${dbName}.sqlite`), temporary);
+        } else {
+          await tarGz(temporary, dumpDir);
+        }
+      },
+      { stat },
+    );
     archived = true;
     result = archive;
   } catch (error) {

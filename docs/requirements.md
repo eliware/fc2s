@@ -6,7 +6,7 @@ FC2S requires Node.js 26 or newer. The SQLite backend uses the built-in `node:sq
 
 The host requires network access to the FAA NASR subscription page and data archive host. It requires writable temporary storage for ZIP downloads and extraction. Reserve sufficient capacity in `EXPORT_DIR` for archives and working files.
 
-MySQL imports require a reachable MySQL-compatible server and `mysqldump` on `PATH`. The database account must create and drop databases, create tables, load rows, list tables, and dump table contents. The server must allow `LOAD DATA LOCAL INFILE` so FC2S can send CSV rows from the client host.
+MySQL imports require a reachable MySQL-compatible server, `mysqldump`, and a `tar` executable on `PATH`. FC2S invokes `tar -czf` and `tar -C` to create SQL archives. On Windows, install or enable a compatible `tar.exe` and make sure it is available as `tar` in the process `PATH`. The database account must create and drop databases, create tables, load rows, list tables, and dump table contents. The server must allow `LOAD DATA LOCAL INFILE` so FC2S can send CSV rows from the client host.
 
 SQLite imports run locally. They run without a MySQL server or MySQL credentials.
 

@@ -2,9 +2,18 @@ import path from "node:path";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { config } from "../config.mjs";
 import { listTables, dumpTable } from "../mysql.mjs";
-import { tarGz } from "../archive.mjs";
+import { atomicArchive, tarGz } from "../archive.mjs";
 
-const defaultDependencies = { config, mkdir, rm, stat, listTables, dumpTable, tarGz };
+const defaultDependencies = {
+  config,
+  mkdir,
+  rm,
+  stat,
+  listTables,
+  dumpTable,
+  tarGz,
+  atomicArchive,
+};
 
 export async function dumpDatabase(dbName, deps = {}) {
   if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
@@ -25,8 +34,9 @@ export async function dumpDatabase(dbName, deps = {}) {
       await d.dumpTable(c, dbName, table, path.join(dumpDir, `${table}.sql`));
     }
 
-    await d.tarGz(archive, dumpDir);
-    if ((await d.stat(archive)).size === 0) throw new Error("Empty archive");
+    await d.atomicArchive(archive, (temporary) => d.tarGz(temporary, dumpDir), {
+      stat: d.stat,
+    });
     return archive;
   } finally {
     await d.rm(dumpDir, { recursive: true, force: true });

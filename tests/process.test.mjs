@@ -35,7 +35,7 @@ test("processDate orchestrates and cleans successful work", async () => {
     schema: async () => [{ table: "T", sql: "CREATE" }],
     db: async () => connection,
     dumpTable: async () => {},
-    tarGz: async () => {},
+    tarGz: async (output) => putFile(output, "archive bytes"),
     stat: async () => ({ size: 1 }),
     rm: async (target) => removed.push(target),
   };
@@ -78,11 +78,12 @@ test("processDate selects SQLite import, archives it, and removes staging", asyn
     },
   ]);
   expect(compressed).toEqual([
-    {
+    expect.objectContaining({
       inputFile: path.join(exportDir, "P_2025_01_02", "P_2025_01_02.sqlite"),
-      output: archive,
-    },
+    }),
   ]);
+  expect(path.basename(compressed[0].output)).toBe(path.basename(archive));
+  expect(path.dirname(path.dirname(compressed[0].output))).toBe(exportDir);
   expect(getFile(archive, "utf8")).toBe("SQLite database");
   expect(fileExists(path.join(exportDir, "P_2025_01_02"))).toBe(false);
   removeTree(root);
@@ -101,7 +102,7 @@ test("processDate applies default overrides with injected dependencies", async (
     schema: async () => [],
     db: async () => ({ query: async () => {}, end: async () => {} }),
     dumpTable: async () => {},
-    tarGz: async () => {},
+    tarGz: async (output) => putFile(output, "archive bytes"),
     stat: async () => ({ size }),
     rm: async (target) => removed.push(target),
   };
@@ -112,6 +113,49 @@ test("processDate applies default overrides with injected dependencies", async (
   removed.length = 0;
   await expect(processDate("2025-01-02", undefined, dependencies)).rejects.toThrow("Empty archive");
   expect(removed).toEqual([path.join(root, "P_2025_01_02"), "/tmp/work"]);
+  removeTree(root);
+});
+
+test("processDate preserves an existing MySQL archive when tar fails", async () => {
+  const root = makeDirectory("process-mysql-preserve");
+  const archive = path.join(root, "P_2025_01_02.sql.tar.gz");
+  putFile(archive, "previous valid archive");
+  const dependencies = {
+    config: () => cfg(root),
+    tempDir: async () => makeDirectory("process-mysql-work"),
+    download: async () => {},
+    extract: async () => {},
+    schema: async () => [{ table: "T", sql: "CREATE" }],
+    db: async () => ({ query: async () => {}, end: async () => {} }),
+    dumpTable: async () => {},
+    tarGz: async (temporary) => {
+      putFile(temporary, "partial archive");
+      throw new Error("tar failed");
+    },
+  };
+  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("tar failed");
+  expect(getFile(archive, "utf8")).toBe("previous valid archive");
+  removeTree(root);
+});
+
+test("processDate preserves an existing SQLite archive when gzip fails", async () => {
+  const root = makeDirectory("process-sqlite-preserve");
+  const archive = path.join(root, "P_2025_01_02.sqlite.gz");
+  putFile(archive, "previous valid archive");
+  const dependencies = {
+    config: () => ({ driver: "sqlite", prefix: "P_", exportDir: root }),
+    tempDir: async () => makeDirectory("process-sqlite-work"),
+    download: async () => {},
+    extract: async () => {},
+    schema: async () => [],
+    importSqlite: async (file) => putFile(file, "sqlite database"),
+    gzipFile: async (_input, temporary) => {
+      putFile(temporary, "partial archive");
+      throw new Error("gzip failed");
+    },
+  };
+  await expect(processDate("2025-01-02", {}, dependencies)).rejects.toThrow("gzip failed");
+  expect(getFile(archive, "utf8")).toBe("previous valid archive");
   removeTree(root);
 });
 

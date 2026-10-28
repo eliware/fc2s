@@ -21,6 +21,7 @@
 - Validate FAA dates, MySQL ports, database identifiers, ZIP paths, and symbolic-link components.
 - Use MySQL `VERIFY_IDENTITY` mode for `mysqldump` when `MYSQL_SSL_CA` is set.
 - Stop failed dump processes, delete incomplete table dumps, and remove standalone dump staging after failures.
+- Stage MySQL and SQLite archives beside their final paths, preserving any prior valid archive when creation fails.
 - Omit request URLs from verbose HTTP logs.
 - Refactor archive, configuration, file, MySQL, process, schema, and SQLite code into focused modules.
 

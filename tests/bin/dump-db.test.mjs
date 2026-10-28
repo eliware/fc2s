@@ -1,4 +1,11 @@
-import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
+import {
+  fileInfo,
+  getFile,
+  makeDirectory,
+  mockEffects,
+  putFile,
+  removeTree,
+} from "../../test-fixtures/mock-effects.mjs";
 import path from "node:path";
 
 await mockEffects();
@@ -26,7 +33,7 @@ test("dump_db launcher reports usage when the database name is missing", async (
 
 test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
   const calls = [];
-  const exportDir = path.resolve("/workspace/exports");
+  const exportDir = makeDirectory("dump-db-exports");
   const config = { exportDir };
   const result = await dumpDatabase("NASR", {
     config: () => config,
@@ -37,20 +44,28 @@ test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
       return ["APT", "NAV"];
     },
     dumpTable: async (...args) => calls.push(["dumpTable", ...args]),
-    tarGz: async (...args) => calls.push(["tarGz", ...args]),
+    tarGz: async (...args) => {
+      calls.push(["tarGz", ...args]);
+      putFile(args[0], "archive contents");
+    },
     stat: async (file) => ({ size: file.endsWith("NASR.sql.tar.gz") ? 10 : 0 }),
   });
   expect(result).toBe(path.join(exportDir, "NASR.sql.tar.gz"));
-  expect(calls).toEqual([
+  expect(calls.slice(0, 6)).toEqual([
     ["mkdir", exportDir, { recursive: true }],
     ["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }],
     ["mkdir", path.join(exportDir, "NASR"), { recursive: true }],
     ["listTables", config, "NASR"],
     ["dumpTable", config, "NASR", "APT", path.join(exportDir, "NASR", "APT.sql")],
     ["dumpTable", config, "NASR", "NAV", path.join(exportDir, "NASR", "NAV.sql")],
-    ["tarGz", path.join(exportDir, "NASR.sql.tar.gz"), path.join(exportDir, "NASR")],
-    ["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }],
   ]);
+  expect(calls[6][0]).toBe("tarGz");
+  expect(path.basename(calls[6][1])).toBe("NASR.sql.tar.gz");
+  expect(path.dirname(path.dirname(calls[6][1]))).toBe(exportDir);
+  expect(calls[6][2]).toBe(path.join(exportDir, "NASR"));
+  expect(calls[7]).toEqual(["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }]);
+  expect(getFile(result, "utf8")).toBe("archive contents");
+  removeTree(exportDir);
 });
 
 test("dumpDatabase rejects unsafe table names and removes the staging directory", async () => {
@@ -71,9 +86,10 @@ test("dumpDatabase rejects unsafe table names and removes the staging directory"
 
 test("dumpDatabase rejects empty archives and removes staging", async () => {
   const removed = [];
+  const exportDir = makeDirectory("dump-db-empty");
   await expect(
     dumpDatabase("NASR", {
-      config: () => ({ exportDir: path.resolve("/workspace/exports") }),
+      config: () => ({ exportDir }),
       mkdir: async () => {},
       rm: async (target) => removed.push(target),
       listTables: async () => [],
@@ -81,8 +97,27 @@ test("dumpDatabase rejects empty archives and removes staging", async () => {
       stat: async () => ({ size: 0 }),
     }),
   ).rejects.toThrow("Empty archive");
-  expect(removed).toEqual([
-    path.resolve("/workspace/exports/NASR"),
-    path.resolve("/workspace/exports/NASR"),
-  ]);
+  expect(removed).toEqual([path.join(exportDir, "NASR"), path.join(exportDir, "NASR")]);
+  removeTree(exportDir);
+});
+
+test("dumpDatabase preserves an existing archive when tar fails", async () => {
+  const exportDir = makeDirectory("dump-db-preserve");
+  const archive = path.join(exportDir, "NASR.sql.tar.gz");
+  putFile(archive, "previous valid archive");
+  await expect(
+    dumpDatabase("NASR", {
+      config: () => ({ exportDir }),
+      mkdir: async () => {},
+      rm: async () => {},
+      listTables: async () => [],
+      tarGz: async (temporary) => {
+        putFile(temporary, "partial archive");
+        throw new Error("tar failed");
+      },
+    }),
+  ).rejects.toThrow("tar failed");
+  expect(getFile(archive, "utf8")).toBe("previous valid archive");
+  expect(fileInfo(exportDir).isDirectory()).toBe(true);
+  removeTree(exportDir);
 });
