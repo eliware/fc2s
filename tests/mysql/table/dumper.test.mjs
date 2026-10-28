@@ -133,6 +133,33 @@ test("dumpTable kills the child and removes partial output when writing fails", 
   removeTree(root);
 });
 
+test("dumpTable handles a process spawn error and removes partial output", async () => {
+  const root = makeDirectory("mysql-spawn-failure");
+  const file = `${root}/partial.sql`;
+  putFile(file, "partial");
+  const failedProcess = new EventEmitter();
+  failedProcess.stdin = { end: () => {} };
+  failedProcess.stdout = new EventEmitter();
+  failedProcess.stderr = new EventEmitter();
+  failedProcess.kill = () => true;
+  const spawn = () => {
+    queueMicrotask(() => {
+      failedProcess.emit("error", new Error("spawn failed"));
+      failedProcess.emit("close", -2);
+    });
+    return failedProcess;
+  };
+  await expect(
+    dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", file, {
+      spawn,
+      pipeline: async () => {},
+      createWriteStream: () => ({}),
+    }),
+  ).rejects.toThrow("spawn failed");
+  expect(fileExists(file)).toBe(false);
+  removeTree(root);
+});
+
 test("dumpTable uses fallback error when stderr is empty", async () => {
   await expect(
     dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", "x", {

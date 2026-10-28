@@ -10,10 +10,10 @@ export async function dumpTable(config, database, table, file, deps = {}) {
   const unlink = deps.unlink ?? defaultUnlink;
   const { command, args, options } = dumpCommand(config, database, table);
   const child = spawn(command, args, { ...options, env: dumpEnvironment() });
-  child.stdin.end(`${config.password}\n`);
   const exited = waitForExit(child, (code) => `mysqldump failed: ${code}`);
   const writing = writeDump(child, file, deps);
   try {
+    child.stdin.end(`${config.password}\n`);
     await Promise.all([exited, writing]);
   } catch (error) {
     child.kill();
