@@ -34,6 +34,7 @@ test("dump_db launcher reports usage when the database name is missing", async (
 test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
   const calls = [];
   const exportDir = makeDirectory("dump-db-exports");
+  const resolvedExportDir = path.resolve(exportDir);
   const config = { exportDir };
   const result = await dumpDatabase("NASR", {
     config: () => config,
@@ -50,20 +51,24 @@ test("dumpDatabase enumerates, dumps, archives, and cleans up", async () => {
     },
     stat: async (file) => ({ size: file.endsWith("NASR.sql.tar.gz") ? 10 : 0 }),
   });
-  expect(result).toBe(path.join(exportDir, "NASR.sql.tar.gz"));
+  expect(result).toBe(path.join(resolvedExportDir, "NASR.sql.tar.gz"));
   expect(calls.slice(0, 6)).toEqual([
     ["mkdir", exportDir, { recursive: true }],
-    ["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }],
-    ["mkdir", path.join(exportDir, "NASR"), { recursive: true }],
+    ["rm", path.join(resolvedExportDir, "NASR"), { recursive: true, force: true }],
+    ["mkdir", path.join(resolvedExportDir, "NASR"), { recursive: true }],
     ["listTables", config, "NASR"],
-    ["dumpTable", config, "NASR", "APT", path.join(exportDir, "NASR", "APT.sql")],
-    ["dumpTable", config, "NASR", "NAV", path.join(exportDir, "NASR", "NAV.sql")],
+    ["dumpTable", config, "NASR", "APT", path.join(resolvedExportDir, "NASR", "APT.sql")],
+    ["dumpTable", config, "NASR", "NAV", path.join(resolvedExportDir, "NASR", "NAV.sql")],
   ]);
   expect(calls[6][0]).toBe("tarGz");
   expect(path.basename(calls[6][1])).toBe("NASR.sql.tar.gz");
-  expect(path.dirname(path.dirname(calls[6][1]))).toBe(exportDir);
-  expect(calls[6][2]).toBe(path.join(exportDir, "NASR"));
-  expect(calls[7]).toEqual(["rm", path.join(exportDir, "NASR"), { recursive: true, force: true }]);
+  expect(path.dirname(path.dirname(calls[6][1]))).toBe(resolvedExportDir);
+  expect(calls[6][2]).toBe(path.join(resolvedExportDir, "NASR"));
+  expect(calls[7]).toEqual([
+    "rm",
+    path.join(resolvedExportDir, "NASR"),
+    { recursive: true, force: true },
+  ]);
   expect(getFile(result, "utf8")).toBe("archive contents");
   removeTree(exportDir);
 });
@@ -87,6 +92,7 @@ test("dumpDatabase rejects unsafe table names and removes the staging directory"
 test("dumpDatabase rejects empty archives and removes staging", async () => {
   const removed = [];
   const exportDir = makeDirectory("dump-db-empty");
+  const resolvedExportDir = path.resolve(exportDir);
   await expect(
     dumpDatabase("NASR", {
       config: () => ({ exportDir }),
@@ -97,7 +103,10 @@ test("dumpDatabase rejects empty archives and removes staging", async () => {
       stat: async () => ({ size: 0 }),
     }),
   ).rejects.toThrow("Empty archive");
-  expect(removed).toEqual([path.join(exportDir, "NASR"), path.join(exportDir, "NASR")]);
+  expect(removed).toEqual([
+    path.join(resolvedExportDir, "NASR"),
+    path.join(resolvedExportDir, "NASR"),
+  ]);
   removeTree(exportDir);
 });
 
