@@ -1,25 +1,29 @@
 # Release Notes
 
-## 15.0.1 — 2026-10-27
+## 15.0.1 — 2026-10-28
 
 ### Added
 
-- Add npm commands for listing dates and importing current or latest datasets using `DB_DRIVER`.
+- Add FAA NASR date discovery and imports for MySQL and SQLite.
+- Add npm commands for listing dates and importing current or latest datasets through `DB_DRIVER`.
 - Add optional verified TLS for MySQL connections, CSV imports, and SQL dumps.
-- Add a live MySQL TLS integration check for certificate validation and local CSV streaming.
-- Add SQLite dataset imports and gzip-compressed database exports.
-- Add usage, requirements, troubleshooting, and configuration documentation for both backends.
+- Add a MySQL TLS integration check for CA and host-name verification and local CSV streaming.
+- Add user guides, requirements, troubleshooting, CLI indexes, and repository specifications.
+- Add GitHub Actions validation and the Eliware Knit deployment workflow.
 
 ### Changed
 
-- Reject ZIP paths that traverse pre-existing symbolic links and validate MySQL ports before connecting.
-- Use MySQL `VERIFY_IDENTITY` mode for `mysqldump` when `MYSQL_SSL_CA` is configured.
-- Process FAA dates in sequence to lower resource use.
-- Remove standalone database dump staging files after success or failure, reject unsafe table identifiers before spawning `mysqldump`, and omit request URLs from verbose HTTP logs.
-- Label the newest FAA date as preview and the second-newest as current in `get:dates` output.
-- Set the package and repository metadata to Eliware Test v15.0.1 conventions.
-- Update runtime requirements to Node.js 26 and use shared Eliware Test validation.
-- Update dependencies and CLI commands for the current MySQL and SQLite workflows.
-- Add FAA date discovery, dataset selection, downloads, schema parsing, and MySQL imports.
-- Add per-table SQL dumps, gzip archives, and process-owned temporary-file cleanup.
-- Add tests, CLI commands, configuration guidance, and repository specifications.
+- Use Node.js 26 and native ESM. Follow Eliware Test v15.0.1 conventions.
+- Update dependencies, repository metadata, and validation scripts.
+- Stream FAA ZIP downloads to disk and delete incomplete files after failures.
+- Run `all` imports sequentially from oldest date to newest.
+- Mark the newest FAA date as preview and the second-newest as current.
+- Validate FAA dates, MySQL ports, database identifiers, ZIP paths, and symbolic-link components.
+- Use MySQL `VERIFY_IDENTITY` mode for `mysqldump` when `MYSQL_SSL_CA` is set.
+- Stop failed dump processes, delete incomplete table dumps, and remove standalone dump staging after failures.
+- Omit request URLs from verbose HTTP logs.
+- Refactor archive, configuration, file, MySQL, process, schema, and SQLite code into focused modules.
+
+- Move the CLI commands to `bin/`. Remove launchers from `examples/`.
+- Replace the prior tag-publishing workflow with the current validation workflow.
+- Replace the root specification with `docs/requirements.md` and `specs/` indexes.
