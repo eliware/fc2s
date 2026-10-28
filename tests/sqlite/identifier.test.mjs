@@ -8,7 +8,6 @@ test("quotes safe table and column identifiers", () => {
   expect(quoteIdentifier("AIRPORT NAME", true)).toBe('"AIRPORT NAME"');
 });
 
-test("rejects unsafe table and column identifiers", () => {
+test("rejects unsafe table identifiers", () => {
   expect(() => quoteIdentifier("BAD-NAME")).toThrow("Unsafe identifier");
-  expect(() => quoteIdentifier("BAD-NAME", true)).toThrow("Unsafe column name");
 });

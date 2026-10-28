@@ -4,7 +4,7 @@ await mockEffects();
 const { dumpCommand } = await import("../../../src/mysql/dump/command.mjs");
 
 test("dumpCommand builds arguments and configures optional verified TLS", () => {
-  const { command, args } = dumpCommand(
+  const { command, args, options } = dumpCommand(
     { host: "host", port: 3306, user: "user", password: "secret", sslCa: "/ca.pem" },
     "database",
     "table",
@@ -14,6 +14,7 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
   expect(args).not.toContain("secret");
   expect(args).toContain("--ssl-verify-server-cert");
   expect(args).toContain("/ca.pem");
+  expect(options).toEqual({ stdio: ["pipe", "pipe", "pipe"] });
 });
 
 test("dumpCommand omits TLS options without a CA", () => {

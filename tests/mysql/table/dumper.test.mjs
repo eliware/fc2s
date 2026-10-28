@@ -51,8 +51,6 @@ test("dumpTable uses injected process and pipeline", async () => {
   expect(calls[0].args).toContain("--password");
   expect(calls[0].args).not.toContain("p");
   expect(calls[0].process.input).toBe("p\n");
-  expect(calls[0].options.env.MYSQL_PWD).toBe("");
-  expect(calls[0].options.env.MARIADB_PWD).toBe("");
   expect(calls[0].args).toContain("table");
   expect(calls[0].args).toContain("--ssl");
   expect(calls[0].args).toContain("--ssl-verify-server-cert");

@@ -1,6 +1,5 @@
 import { mkdir as defaultMkdir, stat as defaultStat } from "node:fs/promises";
 import { config as defaultConfig } from "../config.mjs";
-import { availableDates as defaultAvailableDates } from "../fetch-faa.mjs";
 import {
   tempDir as defaultTempDir,
   download as defaultDownload,
@@ -24,7 +23,6 @@ export const defaultDependencies = {
   db: defaultDb,
   dumpTable: defaultDumpTable,
   tarGz: defaultTarGz,
-  availableDates: defaultAvailableDates,
   importSqlite: defaultImportSqlite,
   gzipFile: defaultGzipFile,
 };

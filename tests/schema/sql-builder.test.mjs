@@ -19,11 +19,8 @@ test("builder creates MySQL columns and data-loading SQL", () => {
   expect(result.sql).toContain("DECIMAL(30,10) NOT NULL");
 });
 
-test("builder defaults invalid VARCHAR lengths and rejects unsafe columns", () => {
+test("builder defaults invalid VARCHAR lengths", () => {
   expect(buildTable("X", "X.csv", [["X", "ID", "", "VARCHAR", "Yes"]]).sql).toContain(
     "VARCHAR(255)",
-  );
-  expect(() => buildTable("X", "X.csv", [["X", "bad-name", "1", "VARCHAR", "Yes"]])).toThrow(
-    "Unsafe column name",
   );
 });

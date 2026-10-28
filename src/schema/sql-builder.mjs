@@ -1,14 +1,7 @@
 import { identifier } from "./identifier.mjs";
+import { sqlColumn } from "./column-identifier.mjs";
 
 export { identifier } from "./identifier.mjs";
-
-function sqlColumn(value) {
-  const column = value.trim().replace(/,+$/, "").trim();
-  if (!/^[A-Za-z_][A-Za-z0-9_ ]*$/.test(column)) {
-    throw new Error(`Unsafe column name: ${column}`);
-  }
-  return `\`${column.replaceAll("`", "``")}\``;
-}
 
 export function buildTable(table, csv, rows) {
   const columns = rows.map((row) => {

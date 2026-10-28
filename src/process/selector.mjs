@@ -1,6 +1,8 @@
+import { dateDependencies } from "./date-dependencies.mjs";
+
 export function createProcess(processDate, defaults) {
   return async function process(mode = "current", overrides = {}, dependencies = {}) {
-    const d = { ...defaults, ...dependencies };
+    const d = { ...dateDependencies, ...defaults, ...dependencies };
     const processDateImpl = d.processDate ?? ((date) => processDate(date, overrides, d));
     const dates = await d.availableDates();
     if (!dates.length) throw new Error("No FAA dates");

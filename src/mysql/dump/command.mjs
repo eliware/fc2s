@@ -1,5 +1,3 @@
-import { dumpEnvironment } from "./environment.mjs";
-
 export function dumpCommand(config, database, table) {
   return {
     command: "mysqldump",
@@ -20,7 +18,6 @@ export function dumpCommand(config, database, table) {
     ],
     options: {
       stdio: ["pipe", "pipe", "pipe"],
-      env: dumpEnvironment(),
     },
   };
 }
