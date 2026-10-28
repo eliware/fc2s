@@ -2,6 +2,8 @@ import {
   fileExists,
   getFile,
   makeDirectory,
+  makeDirectoryAt,
+  makeSymlink,
   mockEffects,
   removeTree,
   setZipEntries,
@@ -68,6 +70,32 @@ test("extract rejects ZIP symbolic links", async () => {
     }),
   ).rejects.toThrow("Unsafe ZIP symbolic link");
   expect(fileExists(`${root}/out/linked.txt`)).toBe(false);
+  removeTree(root);
+});
+
+test("extract rejects paths beneath a pre-existing symlink", async () => {
+  const root = makeDirectory("linked-output");
+  const output = `${root}/out`;
+  const outside = `${root}/outside`;
+  makeDirectoryAt(output);
+  makeDirectoryAt(outside);
+  makeSymlink(outside, `${output}/link`);
+  await expect(
+    extract("archive.zip", output, {
+      AdmZip: class {
+        getEntries() {
+          return [
+            {
+              entryName: "link/escape.txt",
+              isDirectory: false,
+              getData: () => Buffer.from("escape"),
+            },
+          ];
+        }
+      },
+    }),
+  ).rejects.toThrow("Unsafe ZIP symlink path");
+  expect(fileExists(`${outside}/escape.txt`)).toBe(false);
   removeTree(root);
 });
 

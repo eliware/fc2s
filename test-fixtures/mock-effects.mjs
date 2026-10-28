@@ -61,9 +61,18 @@ export function makeDirectory(prefix = "test") {
   return directory;
 }
 
+export function makeDirectoryAt(directory) {
+  vol.mkdirSync(directory, { recursive: true });
+  return directory;
+}
+
 export function putFile(file, content) {
   vol.mkdirSync(file.slice(0, file.lastIndexOf("/")), { recursive: true });
   vol.writeFileSync(file, content);
+}
+
+export function makeSymlink(target, link) {
+  vol.symlinkSync(target, link);
 }
 
 export function getFile(file, encoding) {

@@ -15,7 +15,7 @@ export function dumpCommand(config, database, table) {
       String(config.port),
       "--user",
       config.user,
-      ...(config.sslCa ? ["--ssl", "--ssl-ca", config.sslCa, "--ssl-verify-server-cert"] : []),
+      ...(config.sslCa ? ["--ssl-ca", config.sslCa, "--ssl-mode=VERIFY_IDENTITY"] : []),
       database,
       table,
     ],

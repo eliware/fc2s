@@ -5,6 +5,11 @@ export function validateConfig(values) {
     throw new Error(`Unsupported database driver: ${values.driver}`);
   }
 
-  if (values.driver === "mysql") validateMysqlCredentials(values);
+  if (values.driver === "mysql") {
+    validateMysqlCredentials(values);
+    if (!Number.isInteger(values.port) || values.port < 1 || values.port > 65535) {
+      throw new Error(`Invalid MYSQL_PORT: ${values.port}`);
+    }
+  }
   return values;
 }

@@ -58,8 +58,7 @@ test("dumpTable uses injected process and pipeline", async () => {
   expect(calls[0].args).not.toContain("p");
   expect(calls[0].process.input).toBe("p\n");
   expect(calls[0].args).toContain("table");
-  expect(calls[0].args).toContain("--ssl");
-  expect(calls[0].args).toContain("--ssl-verify-server-cert");
+  expect(calls[0].args).toContain("--ssl-mode=VERIFY_IDENTITY");
   expect(calls[0].args).toContain("/ca.pem");
 });
 
@@ -86,7 +85,7 @@ test("dumpTable keeps TLS optional when no CA is configured", async () => {
     pipeline: async () => {},
     createWriteStream: () => ({}),
   });
-  expect(args).not.toContain("--ssl");
+  expect(args).not.toContain("--ssl-mode=VERIFY_IDENTITY");
 });
 
 test("dumpTable reports injected command failure", async () => {

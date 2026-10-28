@@ -12,6 +12,8 @@
 
 ### Changed
 
+- Reject ZIP paths that traverse pre-existing symbolic links and validate MySQL ports before connecting.
+- Use MySQL `VERIFY_IDENTITY` mode for `mysqldump` when `MYSQL_SSL_CA` is configured.
 - Process FAA dates in sequence to lower resource use.
 - Remove standalone database dump staging files after success or failure, reject unsafe table identifiers before spawning `mysqldump`, and omit request URLs from verbose HTTP logs.
 - Label the newest FAA date as preview and the second-newest as current in `get:dates` output.

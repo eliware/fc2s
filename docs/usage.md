@@ -17,7 +17,7 @@ Set `DB_DRIVER` in `.env` to `mysql` or `sqlite`. It defaults to `mysql`.
 | `MYSQL_HOSTNAME` | —           | MySQL-compatible server host. Required for MySQL. |
 | `MYSQL_USERNAME` | —           | MySQL account name. Required for MySQL.           |
 | `MYSQL_PASSWORD` | —           | MySQL account password. Required for MySQL.       |
-| `MYSQL_PORT`     | `3306`      | MySQL server port.                                |
+| `MYSQL_PORT`     | `3306`      | MySQL TCP port, from 1 through 65535.             |
 | `MYSQL_SSL_CA`   | unset       | PEM CA bundle. This enables verified TLS.         |
 | `NASR_PREFIX`    | `NASR_`     | Prefix for database and export names.             |
 | `EXPORT_DIR`     | `./exports` | Output directory for archives and staging files.  |
