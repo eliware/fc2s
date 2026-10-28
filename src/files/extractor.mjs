@@ -15,6 +15,8 @@ export async function extract(zip, output, deps = {}) {
       names: entries.slice(0, 20).map((entry) => entry.entryName),
     });
     for (const entry of entries) {
+      const unixFileType = ((entry.attr ?? 0) >>> 16) & 0xf000;
+      if (unixFileType === 0xa000) throw new Error("Unsafe ZIP symbolic link");
       const target = resolveEntry(output, entry.entryName);
       if (entry.isDirectory) {
         await mkdir(target, { recursive: true });

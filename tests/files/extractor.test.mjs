@@ -50,6 +50,27 @@ test("extract rejects unsafe ZIP paths", async () => {
   removeTree(root);
 });
 
+test("extract rejects ZIP symbolic links", async () => {
+  const root = makeDirectory("symlink-zip");
+  const symlink = {
+    entryName: "linked.txt",
+    attr: (0o120777 << 16) >>> 0,
+    isDirectory: false,
+    getData: () => Buffer.from("/outside/target"),
+  };
+  await expect(
+    extract("archive.zip", `${root}/out`, {
+      AdmZip: class {
+        getEntries() {
+          return [symlink];
+        }
+      },
+    }),
+  ).rejects.toThrow("Unsafe ZIP symbolic link");
+  expect(fileExists(`${root}/out/linked.txt`)).toBe(false);
+  removeTree(root);
+});
+
 test("extract uses the default ZIP reader", async () => {
   const root = makeDirectory("default-zip");
   setZipEntries([{ entryName: "file.txt", isDirectory: false, getData: () => Buffer.from("zip") }]);
