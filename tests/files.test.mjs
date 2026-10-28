@@ -1,14 +1,12 @@
-import { fileInfo, getFile, mockEffects } from "../test-fixtures/mock-effects.mjs";
+import { fileInfo, mockEffects, removeTree } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const [facade, extractor, transfer, tempDirectory] = await Promise.all([
-  import("../src/files.mjs"),
-  import("../src/files/extractor.mjs"),
-  import("../src/files/transfer.mjs"),
-  import("../src/files/temp-directory.mjs"),
-]);
+const facade = await import("../src/files.mjs");
+const extractor = await import("../src/files/extractor.mjs");
+const transfer = await import("../src/files/transfer.mjs");
+const tempDirectory = await import("../src/files/temp-directory.mjs");
 
-test("files facade delegates transfer and extraction operations", async () => {
+test("files facade exposes and delegates file operations", async () => {
   expect(facade.download).not.toBe(transfer.download);
   expect(facade.tempDir).not.toBe(tempDirectory.tempDir);
   expect(facade.extract).not.toBe(extractor.extract);
@@ -20,25 +18,25 @@ test("files facade delegates transfer and extraction operations", async () => {
   expect(fileInfo(directory).isDirectory()).toBe(true);
 
   const oldFetch = globalThis.fetch;
-  globalThis.fetch = async () => ({
-    ok: true,
-    status: 200,
-    headers: new Headers(),
-    arrayBuffer: async () => Uint8Array.from([1]).buffer,
-  });
+  globalThis.fetch = async () => ({ ok: false, status: 503, headers: [] });
   try {
-    await facade.download("https://localhost/data", "/tmp/facade-data");
-    expect(getFile("/tmp/facade-data")).toEqual(Buffer.from([1]));
+    await expect(facade.download("https://localhost/data", "/tmp/facade-data")).rejects.toThrow(
+      "Download HTTP 503",
+    );
   } finally {
     globalThis.fetch = oldFetch;
   }
 
-  await facade.extract("archive.zip", "/tmp/facade-extract", {
-    AdmZip: class {
-      getEntries() {
-        return [{ entryName: "file.txt", isDirectory: false, getData: () => Buffer.from("ok") }];
-      }
-    },
-  });
-  expect(getFile("/tmp/facade-extract/file.txt", "utf8")).toBe("ok");
+  await expect(
+    facade.extract("archive.zip", "/tmp/facade-extract", {
+      AdmZip: class {
+        getEntries() {
+          return [
+            { entryName: "../escape.txt", isDirectory: false, getData: () => Buffer.from("x") },
+          ];
+        }
+      },
+    }),
+  ).rejects.toThrow("Unsafe ZIP path");
+  removeTree(directory);
 });
