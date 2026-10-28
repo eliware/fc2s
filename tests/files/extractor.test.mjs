@@ -9,6 +9,7 @@ import {
 
 await mockEffects();
 const { extract } = await import("../../src/files/extractor.mjs");
+const { extract: extractThroughFacade } = await import("../../src/files.mjs");
 
 test("extract writes files and directories from ZIP entries", async () => {
   const root = makeDirectory("extract");
@@ -37,7 +38,7 @@ test("extract rejects unsafe ZIP paths", async () => {
     getData: () => Buffer.from("x"),
   };
   await expect(
-    extract("archive.zip", `${root}/out`, {
+    extractThroughFacade("archive.zip", `${root}/out`, {
       AdmZip: class {
         getEntries() {
           return [unsafe];

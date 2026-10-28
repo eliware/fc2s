@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import AdmZip from "adm-zip";
 import { log, step } from "../debug.mjs";
+import { resolveEntry } from "./extractor/path-policy.mjs";
 
 export async function extract(zip, output, deps = {}) {
   return step(`extract ${zip}`, async () => {
@@ -14,10 +15,7 @@ export async function extract(zip, output, deps = {}) {
       names: entries.slice(0, 20).map((entry) => entry.entryName),
     });
     for (const entry of entries) {
-      const target = path.resolve(output, entry.entryName);
-      if (!target.startsWith(`${path.resolve(output)}${path.sep}`)) {
-        throw new Error("Unsafe ZIP path");
-      }
+      const target = resolveEntry(output, entry.entryName);
       if (entry.isDirectory) {
         await mkdir(target, { recursive: true });
       } else {

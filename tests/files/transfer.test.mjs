@@ -2,12 +2,15 @@ import { getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
 const { download } = await import("../../src/files/transfer.mjs");
+const facade = await import("../../src/files.mjs");
 
 test("download rejects HTTP errors", async () => {
   const oldFetch = globalThis.fetch;
   globalThis.fetch = async () => ({ ok: false, status: 503, headers: [] });
   try {
-    await expect(download("https://localhost/data", "/tmp/x")).rejects.toThrow("Download HTTP 503");
+    await expect(facade.download("https://localhost/data", "/tmp/x")).rejects.toThrow(
+      "Download HTTP 503",
+    );
   } finally {
     globalThis.fetch = oldFetch;
   }

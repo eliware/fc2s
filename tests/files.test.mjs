@@ -16,27 +16,5 @@ test("files facade exposes and delegates file operations", async () => {
 
   const directory = await facade.tempDir();
   expect(fileInfo(directory).isDirectory()).toBe(true);
-
-  const oldFetch = globalThis.fetch;
-  globalThis.fetch = async () => ({ ok: false, status: 503, headers: [] });
-  try {
-    await expect(facade.download("https://localhost/data", "/tmp/facade-data")).rejects.toThrow(
-      "Download HTTP 503",
-    );
-  } finally {
-    globalThis.fetch = oldFetch;
-  }
-
-  await expect(
-    facade.extract("archive.zip", "/tmp/facade-extract", {
-      AdmZip: class {
-        getEntries() {
-          return [
-            { entryName: "../escape.txt", isDirectory: false, getData: () => Buffer.from("x") },
-          ];
-        }
-      },
-    }),
-  ).rejects.toThrow("Unsafe ZIP path");
   removeTree(directory);
 });
