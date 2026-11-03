@@ -1,5 +1,12 @@
 # Release Notes
 
+## 15.1.0 — 2026-11-03
+
+### Changed
+
+- Set the FC2S package version to 15.1.0.
+- Update Eliware Test to 15.1.0 and refresh the dependency lockfile.
+
 ## 15.0.1 — 2026-10-28
 
 ### Added
