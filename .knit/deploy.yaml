@@ -9,3 +9,10 @@ on:
           - git pull
           - npm ci
           - npm test
+      - target: nas
+        cwd: /eliware/fc2s
+        timeoutMs: 300000
+        commands:
+          - git pull
+          - npm ci
+          - npm test
