@@ -2,40 +2,34 @@
 
 ## Runtime
 
-FC2S requires Node.js 26 or newer. The SQLite backend uses the built-in `node:sqlite` module. Install package dependencies with `npm ci`.
+FC2S requires Node.js 26 or newer and npm 12 or newer. Run commands from the repository root. Install dependencies with `npm ci`.
 
-The host requires network access to the FAA NASR subscription page and data archive host. It requires writable temporary storage for ZIP downloads and extraction. Reserve sufficient capacity in `EXPORT_DIR` for archives and working files.
+FC2S requires network access to the FAA NASR subscription page and ZIP archive host. The host requires writable temporary storage for downloads and extracted CSV files. Keep sufficient storage capacity for database files and compressed archives.
 
-MySQL imports require a reachable MySQL-compatible server, `mysqldump`, and a `tar` executable on `PATH`. FC2S invokes `tar -czf` and `tar -C` to create SQL archives. On Windows, install or enable a compatible `tar.exe` and make sure it is available as `tar` in the process `PATH`. The database account must create and drop databases, create tables, load rows, list tables, and dump table contents. The server must allow `LOAD DATA LOCAL INFILE` so FC2S can send CSV rows from the client host.
+MySQL imports require a reachable MySQL-compatible server, `mysqldump`, and `tar` on `PATH`. On Windows, add a compatible `tar.exe` to `PATH`. The MySQL server must allow `LOAD DATA LOCAL INFILE`. The account must have permission to create and drop databases, create tables, load rows, list tables, and dump table contents.
 
-SQLite imports run locally. They run without a MySQL server or MySQL credentials.
+SQLite imports run locally through Node.js built-in `node:sqlite`. They do not require a MySQL server or MySQL credentials.
 
 ## Configuration
 
-FC2S reads environment variables and values from `.env` in the project root. `DB_DRIVER` accepts `mysql` or `sqlite`. Its default is `mysql`.
+FC2S reads settings from the process environment and `.env` in the repository root. It accepts `DB_DRIVER=mysql` or `DB_DRIVER=sqlite`. MySQL credentials are required only when `DB_DRIVER=mysql`.
 
-MySQL uses `MYSQL_HOSTNAME`, `MYSQL_USERNAME`, and `MYSQL_PASSWORD`. All three are required. `MYSQL_PORT` defaults to `3306`. `MYSQL_SSL_CA` is optional. When set, FC2S enables TLS and verifies the trusted CA chain and server host name. Without this variable, TLS is not requested by FC2S.
-
-`NASR_PREFIX` defaults to `NASR_`. `EXPORT_DIR` defaults to `./exports`. The [usage guide](usage.md#install-and-configure) lists each variable.
+The [usage guide](usage.md#install-and-configure) lists every environment variable, its default, and its required status. When `MYSQL_SSL_CA` contains a path, FC2S verifies the trusted CA chain and server host name. Keep the variable unset when the server allows connections without TLS.
 
 ## Import workflow
 
-FC2S reads FAA dates from release labels and sorts them newest first. It downloads the selected ZIP file and extracts its CSV files into a temporary directory. The FAA data-structure CSV supplies table and field definitions.
+FC2S reads FAA release labels, sorts their dates newest first, downloads the selected ZIP file, and extracts its CSV files. It uses the FAA data-structure CSV files to create database tables and load rows.
 
-For MySQL, FC2S drops and recreates the date-named database. It creates the tables, loads CSV rows, dumps each table with `mysqldump`, and packages the dumps in a `.sql.tar.gz` archive.
+`latest` selects the newest listed date. `current` selects the second newest date, or the only available date. `all` imports each listed date in sequence from oldest to newest. The date command imports the ISO date that the user supplies.
 
-For SQLite, FC2S creates a local database with text columns. It imports CSV data in a transaction and compresses the finished database to `.sqlite.gz`.
+MySQL imports drop and recreate the date-named database. They create tables, load CSV rows, dump each table with `mysqldump`, and write a `.sql.tar.gz` archive.
 
-`latest` selects the newest listed date. `current` selects the second newest when available. It uses the only available date when the page lists one. `all` selects every listed date and imports them sequentially, starting with the oldest. A date command selects one ISO date.
+SQLite imports create text columns and load CSV rows in a transaction. They gzip the resulting database as a `.sqlite.gz` archive. Text columns preserve source values such as leading zeros and decimal strings.
 
-Completed runs remove download, extraction, and staging files. Database and archive outputs remain. A failed date import can produce an incomplete database or staging directory. Inspect these before retrying. `dump_db.mjs` deletes its staging folder after success and after failure.
+## Data retention
 
-## Commands
+Completed imports remove temporary downloads, extracted files, and staging directories. They keep completed archives. MySQL databases remain after export. FC2S does not prune archives for older dates.
 
-Run `npm run get:dates` to list FAA dates. Run `npm run current` or `npm run latest` to import with the backend from `.env`. Other scripts are listed in the [command guide](../bin/README.md). See [Usage](usage.md#select-a-dataset) for examples.
+A failed import can stop with an incomplete MySQL database or staging directory. Inspect these items before retrying. A retry drops and recreates the matching MySQL database and replaces the matching SQLite staging directory.
 
-## Data and credentials
-
-A repeated MySQL import drops and recreates its date-named database. Set `NASR_PREFIX` to prevent collisions with unrelated databases. Keep `.env` out of source control because it contains database credentials.
-
-FAA datasets and generated exports can be large. Keep them out of source control and reserve disk capacity for output and temporary files. Verbose logs can contain paths, host details, and error stacks. Inspect logs before sharing them.
+The [usage guide](usage.md) documents command results, archive names, and database safety. The [troubleshooting guide](troubleshooting.md) lists recovery steps for common failures.

@@ -1,12 +1,14 @@
 # Release Notes
 
-## 15.2.0 — 2026-11-23
+## 15.2.0 — 2026-11-24
 
 ### Changed
 
 - Set the FC2S package version to 15.2.0.
 - Update Eliware Test to 15.2.0 and refresh the dependency lockfile.
 - Expose the archive, file, and MySQL modules through package exports.
+- Expand end-user guidance for setup, configuration, imports, and output files.
+- Refresh the lockfile with the latest compatible transitive package versions.
 
 ## 15.0.1 — 2026-10-28
 

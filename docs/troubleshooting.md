@@ -10,13 +10,15 @@ Read the command output first. To see more, run the date-specific command with `
 
 **`node:sqlite` is unavailable** — Install Node.js 26 or newer. Check the active version with `node --version`.
 
-**Packages are missing or inconsistent** — Run `npm ci` from the repository root.
+**Packages are missing or inconsistent** — Use Node.js 26 or newer and npm 12 or newer. Run `npm ci` from the repository root.
 
 ## FAA dates and downloads
 
 **`No FAA dates` or no output from `npm run get:dates`** — Check network access and the FAA subscription page. FC2S reads dates from FAA release labels. It ignores page-modified timestamps. The FAA page format may have changed if no dates appear.
 
 **`FAA HTTP ...` or `Download HTTP ...`** — The FAA returned an unsuccessful response. Check proxy and firewall rules, network access, and the FAA site. The date page and ZIP host can have separate outages.
+
+**`Invalid date`** — Use a valid calendar date in `YYYY-MM-DD` format. Check that the FAA archive exists for that date.
 
 **ZIP extraction or schema errors** — Check temporary disk capacity and retry the date. If the same ZIP fails again, save the error output and date for diagnosis.
 
@@ -27,6 +29,8 @@ Read the command output first. To see more, run the date-specific command with `
 **TLS certificate or host-name error** — Set `MYSQL_SSL_CA` to a readable PEM bundle that trusts the server certificate. Connect with a host name listed in that certificate. FC2S rejects invalid CA chains and host-name mismatches. Remove `MYSQL_SSL_CA` only if the server permits connections without TLS.
 
 **`mysqldump` cannot start** — Install MySQL command-line tools and make sure `mysqldump` is on `PATH`. `npm ci` does not install this system command.
+
+**`tar` cannot start** — Install a compatible `tar` command and make sure it is on `PATH`. On Windows, use a compatible `tar.exe`.
 
 **`LOAD DATA LOCAL INFILE` fails** — Allow local infile on the server. MariaDB commonly uses `local_infile=ON`. Check account rights. FC2S sends CSV data from its own host, so the files can stay on the client host.
 
