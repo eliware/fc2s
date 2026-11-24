@@ -1,12 +1,10 @@
 import path from "node:path";
-import { log } from "./debug.mjs";
-import { csvForTable, readSchemaFiles } from "./schema/parser.mjs";
-import { buildTable } from "./schema/sql-builder.mjs";
-import { identifier } from "./schema/identifier.mjs";
+import log from "./debug.mjs";
+import csvForTable from "./schema/csv-for-table.mjs";
+import readSchemaFiles from "./schema/parser.mjs";
+import buildTable from "./schema/sql-builder.mjs";
 
-export { identifier };
-
-export async function schema(dir) {
+export default async function schema(dir) {
   const { files, dataFiles } = await readSchemaFiles(dir);
   if (!files.length) throw new Error(`No schema files in ${dir}`);
 

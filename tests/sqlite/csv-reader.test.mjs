@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 import { mockEffects, putFile } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { readCsvRows } = await import("../../src/sqlite/csv-reader.mjs");
+const readCsvRows = (await import("../../src/sqlite/csv-reader.mjs")).default;
 
 test("CSV reader skips its header and returns numbered rows", async () => {
   const rows = [];

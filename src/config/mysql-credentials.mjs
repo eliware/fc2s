@@ -1,4 +1,4 @@
-export function validateMysqlCredentials(values) {
+export default function validateMysqlCredentials(values) {
   for (const key of ["host", "user", "password"]) {
     if (values[key] === undefined) {
       const envKey = key === "host" ? "HOSTNAME" : key === "user" ? "USERNAME" : "PASSWORD";

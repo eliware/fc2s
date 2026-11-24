@@ -8,7 +8,7 @@ import {
 } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { tarGz } = await import("../../src/archive/tar.mjs");
+const tarGz = (await import("../../src/archive/tar.mjs")).default;
 
 test("tarGz creates an archive through the default mocked child process", async () => {
   const root = makeDirectory("archive");

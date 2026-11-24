@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { validateConfig } = await import("../../src/config/validator.mjs");
+const validateConfig = (await import("../../src/config/validator.mjs")).default;
 
 test("validator accepts supported drivers and returns the settings", () => {
   const sqlite = { driver: "sqlite" };

@@ -1,8 +1,8 @@
 import { createReadStream } from "node:fs";
 import { parse } from "csv-parse";
-import { isHeader } from "./header-detection.mjs";
+import isHeader from "./header-detection.mjs";
 
-export async function* readCsvRows(file, columns, deps = {}) {
+export default async function* readCsvRows(file, columns, deps = {}) {
   const createRead = deps.createReadStream ?? createReadStream;
   const source = createRead(file);
   const parser = parse({ bom: true, skip_empty_lines: true, relax_column_count: true });

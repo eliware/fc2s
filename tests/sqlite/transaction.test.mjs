@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { transaction } = await import("../../src/sqlite/transaction.mjs");
+const transaction = (await import("../../src/sqlite/transaction.mjs")).default;
 
 test("transaction commits successful work and closes the database", async () => {
   const calls = [];

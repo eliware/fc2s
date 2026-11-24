@@ -2,7 +2,7 @@ import { makeDirectory, mockEffects, putFile, removeTree } from "../test-fixture
 import path from "node:path";
 
 await mockEffects();
-const { schema } = await import("../src/schema.mjs");
+const schema = (await import("../src/schema.mjs")).default;
 
 test("schema assembles parsed fields and generated SQL for a matching CSV", async () => {
   const directory = makeDirectory("schema-integration");

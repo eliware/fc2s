@@ -2,7 +2,8 @@ import { EventEmitter } from "node:events";
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { run, waitForExit } = await import("../../src/commands/runner.mjs");
+const run = (await import("../../src/commands/runner.mjs")).default;
+const waitForExit = (await import("../../src/commands/wait-for-exit.mjs")).default;
 
 function child({ output = "", error = "", code = 0 } = {}) {
   const process = new EventEmitter();

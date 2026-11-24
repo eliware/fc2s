@@ -1,5 +1,5 @@
 import "dotenv/config";
 
-export function loadEnvironment() {
+export default function loadEnvironment() {
   return process.env;
 }

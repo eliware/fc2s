@@ -1,7 +1,8 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { identifier, validateIdentifier } = await import("../../src/schema/identifier.mjs");
+const identifier = (await import("../../src/schema/identifier.mjs")).default;
+const validateIdentifier = (await import("../../src/schema/validate-identifier.mjs")).default;
 
 test("identifier accepts safe names and rejects unsafe names", () => {
   expect(identifier("AIRPORT")).toBe("`AIRPORT`");

@@ -8,7 +8,7 @@ import {
 } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { atomicArchive } = await import("../../src/archive/atomic.mjs");
+const atomicArchive = (await import("../../src/archive/atomic.mjs")).default;
 
 test("atomicArchive replaces an existing archive after creating a nonempty replacement", async () => {
   const root = makeDirectory("atomic-archive");

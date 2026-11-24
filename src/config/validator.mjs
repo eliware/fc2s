@@ -1,6 +1,6 @@
-import { validateMysqlCredentials } from "./mysql-credentials.mjs";
+import validateMysqlCredentials from "./mysql-credentials.mjs";
 
-export function validateConfig(values) {
+export default function validateConfig(values) {
   if (!["mysql", "sqlite"].includes(values.driver)) {
     throw new Error(`Unsupported database driver: ${values.driver}`);
   }

@@ -1,4 +1,5 @@
-import { availableDates, formatDates } from "../src/fetch-faa.mjs";
+import availableDates from "../src/fetch-faa.mjs";
+import formatDates from "../src/format-dates.mjs";
 
 try {
   console.log(formatDates(await availableDates()));

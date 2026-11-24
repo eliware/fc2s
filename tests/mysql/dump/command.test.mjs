@@ -1,7 +1,7 @@
 import { mockEffects } from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { dumpCommand } = await import("../../../src/mysql/dump/command.mjs");
+const dumpCommand = (await import("../../../src/mysql/dump/command.mjs")).default;
 
 test("dumpCommand builds arguments and configures optional verified TLS", () => {
   const { command, args, options } = dumpCommand(

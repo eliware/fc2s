@@ -1,10 +1,12 @@
 import { mkdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 import AdmZip from "adm-zip";
-import { log, step } from "../debug.mjs";
-import { assertNoSymlinkPath, resolveEntry } from "./extractor/path-policy.mjs";
+import log from "../debug.mjs";
+import step from "../debug/step.mjs";
+import assertNoSymlinkPath from "./extractor/assert-no-symlink-path.mjs";
+import resolveEntry from "./extractor/resolve-entry.mjs";
 
-export async function extract(zip, output, deps = {}) {
+export default async function extract(zip, output, deps = {}) {
   return step(`extract ${zip}`, async () => {
     await mkdir(output, { recursive: true });
     const root = await realpath(output);

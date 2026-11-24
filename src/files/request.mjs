@@ -1,6 +1,6 @@
-import { log } from "../debug.mjs";
+import log from "../debug.mjs";
 
-export async function request(url) {
+export default async function request(url) {
   const response = await fetch(url);
   log("HTTP response", {
     status: response.status,

@@ -10,7 +10,7 @@ import {
 } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { processDate } = await import("../src/process.mjs");
+const processDate = (await import("../src/process.mjs")).default;
 
 const cfg = (exportDir) => ({
   driver: "mysql",

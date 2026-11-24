@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { request } = await import("../../src/files/request.mjs");
+const request = (await import("../../src/files/request.mjs")).default;
 
 test("request returns a successful HTTP response", async () => {
   const oldFetch = globalThis.fetch;

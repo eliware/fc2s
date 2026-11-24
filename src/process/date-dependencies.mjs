@@ -1,3 +1,3 @@
-import { availableDates } from "../fetch-faa.mjs";
+import availableDates from "../fetch-faa.mjs";
 
 export const dateDependencies = { availableDates };

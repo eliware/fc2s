@@ -1,14 +1,11 @@
 import path from "node:path";
-import { dataUrl } from "./fetch-faa.mjs";
-import { identifier } from "./schema.mjs";
-import { log } from "./debug.mjs";
-import { createProcess } from "./process/selector.mjs";
-import { cleanupProcess } from "./process/cleanup.mjs";
+import dataUrl from "./data-url.mjs";
+import identifier from "./schema/identifier.mjs";
+import log from "./debug.mjs";
+import cleanupProcess from "./process/cleanup.mjs";
 import { defaultDependencies } from "./process/dependencies.mjs";
 
-export { defaultDependencies };
-
-export async function processDate(date, overrides = {}, dependencies = {}) {
+export default async function processDate(date, overrides = {}, dependencies = {}) {
   const url = dataUrl(date);
   const d = { ...defaultDependencies, ...dependencies };
   const c = d.config(overrides);
@@ -88,5 +85,3 @@ export async function processDate(date, overrides = {}, dependencies = {}) {
   await cleanupProcess(work, dumpDir, archived, rm, operationError);
   return result;
 }
-
-export const process = createProcess(processDate, defaultDependencies);

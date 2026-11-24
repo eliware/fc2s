@@ -3,7 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import { makeDirectory, mockEffects, putFile, removeTree } from "../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { importSqlite } = await import("../src/sqlite.mjs");
+const importSqlite = (await import("../src/sqlite.mjs")).default;
 
 function inMemoryDatabase() {
   const database = new DatabaseSync(":memory:");

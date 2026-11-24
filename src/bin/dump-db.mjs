@@ -1,6 +1,6 @@
 import path from "node:path";
 import { mkdir, rm, stat } from "node:fs/promises";
-import { config } from "../config.mjs";
+import config from "../config.mjs";
 import { listTables, dumpTable } from "../mysql.mjs";
 import { atomicArchive, tarGz } from "../archive.mjs";
 
@@ -15,7 +15,7 @@ const defaultDependencies = {
   atomicArchive,
 };
 
-export async function dumpDatabase(dbName, deps = {}) {
+export default async function dumpDatabase(dbName, deps = {}) {
   if (!dbName || !/^[A-Za-z0-9_$]+$/.test(dbName)) {
     throw new Error("Usage: node bin/dump_db.mjs <db_name>");
   }

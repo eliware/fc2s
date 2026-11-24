@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { validateColumnIdentifier } = await import("../../src/sqlite/column-identifier.mjs");
+const validateColumnIdentifier = (await import("../../src/sqlite/column-identifier.mjs")).default;
 
 test("column identifier validation accepts safe names and returns them", () => {
   expect(validateColumnIdentifier("AIRPORT NAME")).toBe("AIRPORT NAME");

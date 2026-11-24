@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { validateMysqlCredentials } = await import("../../src/config/mysql-credentials.mjs");
+const validateMysqlCredentials = (await import("../../src/config/mysql-credentials.mjs")).default;
 
 test.each([
   ["host", "HOSTNAME"],

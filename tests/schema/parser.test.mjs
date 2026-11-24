@@ -6,7 +6,8 @@ import {
 } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { csvForTable, readSchemaFiles } = await import("../../src/schema/parser.mjs");
+const readSchemaFiles = (await import("../../src/schema/parser.mjs")).default;
+const csvForTable = (await import("../../src/schema/csv-for-table.mjs")).default;
 
 test("parser reads schema CSV rows and trims their fields", async () => {
   const directory = makeDirectory("schema-parser");

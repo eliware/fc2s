@@ -8,7 +8,7 @@ import {
 
 await mockEffects();
 const { defaultDependencies } = await import("../../src/process/dependencies.mjs");
-const { processDate } = await import("../../src/process.mjs");
+const processDate = (await import("../../src/process.mjs")).default;
 
 test("default dependency container is replaceable for isolated runs", async () => {
   const root = makeDirectory("fc2s-process-");

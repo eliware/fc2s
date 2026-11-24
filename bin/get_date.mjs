@@ -1,4 +1,4 @@
-import { processDate } from "../src/process.mjs";
+import processDate from "../src/process.mjs";
 
 const verbose = globalThis.process.argv.includes("--verbose");
 if (verbose) process.env.FC2S_VERBOSE = "1";

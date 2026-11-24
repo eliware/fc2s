@@ -10,7 +10,7 @@ import {
 } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { extract } = await import("../../src/files/extractor.mjs");
+const extract = (await import("../../src/files/extractor.mjs")).default;
 const { extract: extractThroughFacade } = await import("../../src/files.mjs");
 
 test("extract writes files and directories from ZIP entries", async () => {

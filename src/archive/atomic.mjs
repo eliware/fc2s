@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdtemp, rename, rm, stat } from "node:fs/promises";
 
-export async function atomicArchive(output, create, dependencies = {}) {
+export default async function atomicArchive(output, create, dependencies = {}) {
   const d = { mkdtemp, rename, rm, stat, ...dependencies };
   const directory = await d.mkdtemp(path.join(path.dirname(output), ".fc2s-archive-"));
   const temporary = path.join(directory, path.basename(output));

@@ -1,16 +1,9 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
-import { log } from "../debug.mjs";
+import log from "../debug.mjs";
 
-export function csvForTable(table, dataFiles) {
-  const exact = `${table}.csv`;
-  if (dataFiles.includes(exact)) return exact;
-  const matches = dataFiles.filter((name) => name.startsWith(`${table}_`));
-  return matches.length === 1 ? matches[0] : null;
-}
-
-export async function readSchemaFiles(dir) {
+export default async function readSchemaFiles(dir) {
   const entries = await readdir(dir);
   const filenames = entries.filter((name) => name.endsWith("_CSV_DATA_STRUCTURE.csv"));
   const dataFiles = entries.filter(

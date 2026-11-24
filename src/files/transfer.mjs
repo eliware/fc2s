@@ -1,10 +1,11 @@
 import { createWriteStream } from "node:fs";
 import { rm } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
-import { log, step } from "../debug.mjs";
-import { request } from "./request.mjs";
+import log from "../debug.mjs";
+import step from "../debug/step.mjs";
+import request from "./request.mjs";
 
-export async function download(url, file) {
+export default async function download(url, file) {
   return step("download", async () => {
     const response = await request(url);
     let bytes = 0;

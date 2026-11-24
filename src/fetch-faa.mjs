@@ -1,8 +1,7 @@
-export const HOME_PAGE =
+const HOME_PAGE =
   "https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/";
-export const DATA_FILE = "https://nfdc.faa.gov/webContent/28DaySub/extra/d_M_Y_CSV.zip";
 
-export function parseDates(html) {
+function parseDates(html) {
   const dates = [];
   for (const match of html.matchAll(/Subscription effective\s+([A-Z][a-z]+ \d{1,2}, \d{4})/g)) {
     const date = new Date(match[1]);
@@ -11,31 +10,7 @@ export function parseDates(html) {
   return [...new Set(dates)].sort((a, b) => b.localeCompare(a));
 }
 
-export function formatDates(dates) {
-  return dates
-    .map((date, index) => `${date}${index === 0 ? " (preview)" : index === 1 ? " (current)" : ""}`)
-    .join("\n");
-}
-
-export function dataUrl(date) {
-  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    throw new Error("Invalid date");
-  }
-  const value = new Date(`${date}T00:00:00Z`);
-  if (Number.isNaN(value.valueOf()) || value.toISOString().slice(0, 10) !== date) {
-    throw new Error("Invalid date");
-  }
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).formatToParts(value);
-  const formatted = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return DATA_FILE.replace("d_M_Y", `${formatted.day}_${formatted.month}_${formatted.year}`);
-}
-
-export async function availableDates(url = HOME_PAGE) {
+export default async function availableDates(url = HOME_PAGE) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`FAA HTTP ${response.status}`);
   return parseDates(await response.text());

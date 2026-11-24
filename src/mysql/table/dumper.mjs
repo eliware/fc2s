@@ -1,11 +1,11 @@
 import { spawn as defaultSpawn } from "node:child_process";
 import { unlink as defaultUnlink } from "node:fs/promises";
-import { waitForExit } from "../../commands/runner.mjs";
-import { dumpCommand } from "../dump/command.mjs";
-import { dumpEnvironment } from "../dump/environment.mjs";
-import { writeDump } from "../dump/writer.mjs";
+import waitForExit from "../../commands/wait-for-exit.mjs";
+import dumpCommand from "../dump/command.mjs";
+import dumpEnvironment from "../dump/environment.mjs";
+import writeDump from "../dump/writer.mjs";
 
-export async function dumpTable(config, database, table, file, deps = {}) {
+export default async function dumpTable(config, database, table, file, deps = {}) {
   const spawn = deps.spawn ?? defaultSpawn;
   const unlink = deps.unlink ?? defaultUnlink;
   const { command, args, options } = dumpCommand(config, database, table);

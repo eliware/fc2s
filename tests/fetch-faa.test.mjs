@@ -1,41 +1,19 @@
-import { HOME_PAGE, availableDates, dataUrl, formatDates, parseDates } from "../src/fetch-faa.mjs";
-
-test("parseDates returns unique newest-first ISO dates", () => {
-  expect(
-    parseDates(
-      "Preview: Subscription effective January 2, 2025; Subscription effective January 2, 2025; Archives: Subscription effective March 10, 2024; Page last modified: January 3, 2025",
-    ),
-  ).toEqual(["2025-01-02", "2024-03-10"]);
-});
-test("parseDates ignores invalid calendar dates", () => {
-  expect(parseDates("Subscription effective Fakemonth 31, 2025")).toEqual([]);
-});
-
-test("formatDates labels preview and current listings", () => {
-  expect(formatDates(["2026-10-29", "2026-10-01", "2026-09-03"])).toBe(
-    "2026-10-29 (preview)\n2026-10-01 (current)\n2026-09-03",
-  );
-  expect(formatDates(["2026-10-29"])).toBe("2026-10-29 (preview)");
-});
-
-test("dataUrl formats FAA date", () => {
-  expect(dataUrl("2025-01-02")).toContain("02_Jan_2025_CSV.zip");
-});
-test("dataUrl rejects invalid date", () => {
-  expect(() => dataUrl("nope")).toThrow("Invalid date");
-});
+import availableDates from "../src/fetch-faa.mjs";
+import dataUrl from "../src/data-url.mjs";
 
 test("availableDates uses FAA home page by default", async () => {
   const old = globalThis.fetch;
   globalThis.fetch = async (url) => {
-    expect(url).toBe(HOME_PAGE);
+    expect(url).toBe(
+      "https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/",
+    );
     return {
       ok: true,
       text: async () =>
-        "Subscription effective April 1, 2025; Subscription effective March 1, 2025",
+        "Subscription effective January 2, 2025; Subscription effective January 2, 2025; Subscription effective March 10, 2024; Subscription effective Fakemonth 31, 2025",
     };
   };
-  await expect(availableDates()).resolves.toEqual(["2025-04-01", "2025-03-01"]);
+  await expect(availableDates()).resolves.toEqual(["2025-01-02", "2024-03-10"]);
   globalThis.fetch = old;
 });
 

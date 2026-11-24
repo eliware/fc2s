@@ -1,4 +1,4 @@
-export function validateColumnIdentifier(value) {
+export default function validateColumnIdentifier(value) {
   if (!/^[A-Za-z_][A-Za-z0-9_ ]*$/.test(value)) {
     throw new Error(`Unsafe column name: ${value}`);
   }

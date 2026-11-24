@@ -1,4 +1,4 @@
-import { process as runProcess } from "../src/process.mjs";
+import runProcess from "../src/process/current.mjs";
 
 try {
   console.log((await runProcess("current")).join("\n"));

@@ -1,7 +1,7 @@
 import { mockEffects } from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { dumpEnvironment } = await import("../../../src/mysql/dump/environment.mjs");
+const dumpEnvironment = (await import("../../../src/mysql/dump/environment.mjs")).default;
 
 test("dumpEnvironment clears inherited MySQL password variables", () => {
   const originalMysqlPassword = process.env.MYSQL_PWD;

@@ -3,7 +3,7 @@ import { unlink } from "node:fs/promises";
 import { createGzip } from "node:zlib";
 import { pipeline } from "node:stream/promises";
 
-export async function gzipFile(input, output) {
+export default async function gzipFile(input, output) {
   try {
     await pipeline(createReadStream(input), createGzip(), createWriteStream(output));
   } catch (error) {

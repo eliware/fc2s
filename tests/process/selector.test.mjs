@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { createProcess } = await import("../../src/process/selector.mjs");
+const createProcess = (await import("../../src/process/selector.mjs")).default;
 
 test("process selector selects latest, current, and all dates", async () => {
   const calls = [];

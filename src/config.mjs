@@ -1,7 +1,7 @@
-import { loadEnvironment } from "./config/environment.mjs";
-import { validateConfig } from "./config/validator.mjs";
+import loadEnvironment from "./config/environment.mjs";
+import validateConfig from "./config/validator.mjs";
 
-export function config(overrides = {}) {
+export default function config(overrides = {}) {
   const env = loadEnvironment();
   const values = {
     driver: env.DB_DRIVER || "mysql",

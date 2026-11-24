@@ -1,4 +1,4 @@
-export async function cleanupProcess(work, dumpDir, archived, rm, operationError) {
+export default async function cleanupProcess(work, dumpDir, archived, rm, operationError) {
   let cleanupError;
   try {
     await rm(work, { recursive: true, force: true });

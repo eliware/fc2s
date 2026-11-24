@@ -1,7 +1,7 @@
 import { fileInfo, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { tempDir } = await import("../../src/files/temp-directory.mjs");
+const tempDir = (await import("../../src/files/temp-directory.mjs")).default;
 
 test("tempDir creates unique in-memory directories", async () => {
   const first = await tempDir();

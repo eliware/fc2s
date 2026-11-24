@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { buildTable } = await import("../../src/schema/sql-builder.mjs");
+const buildTable = (await import("../../src/schema/sql-builder.mjs")).default;
 
 test("builder creates MySQL columns and data-loading SQL", () => {
   const result = buildTable("AIRPORT", "/data/AIRPORT.csv", [

@@ -1,4 +1,4 @@
-export async function transaction(database, operation) {
+export default async function transaction(database, operation) {
   let started = false;
   try {
     database.exec("PRAGMA journal_mode = DELETE; PRAGMA synchronous = FULL; BEGIN IMMEDIATE;");

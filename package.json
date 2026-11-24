@@ -1,6 +1,6 @@
 {
   "name": "@eliware/fc2s",
-  "version": "15.1.0",
+  "version": "15.2.0",
   "type": "module",
   "description": "Node.js ESM importer for FAA NASR CSV datasets with MySQL and SQLite exports.",
   "keywords": [
@@ -44,12 +44,12 @@
   "dependencies": {
     "adm-zip": "^0.6.1",
     "csv-parse": "^7.0.3",
-    "dotenv": "^18.0.9",
+    "dotenv": "^18.0.10",
     "mysql2": "^3.24.6"
   },
   "devDependencies": {
-    "@eliware/test": "^15.1.0",
-    "memfs": "^4.80.0"
+    "@eliware/test": "^15.2.0",
+    "memfs": "^4.80.1"
   },
   "jest": {
     "testEnvironment": "node",
@@ -103,5 +103,10 @@
       "general",
       "application"
     ]
+  },
+  "exports": {
+    "./archive": "./src/archive.mjs",
+    "./files": "./src/files.mjs",
+    "./mysql": "./src/mysql.mjs"
   }
 }

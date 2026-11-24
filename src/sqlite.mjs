@@ -1,9 +1,9 @@
 import { DatabaseSync } from "node:sqlite";
-import { readCsvRows } from "./sqlite/csv-reader.mjs";
-import { createTableWriter } from "./sqlite/table-writer.mjs";
-import { transaction } from "./sqlite/transaction.mjs";
+import readCsvRows from "./sqlite/csv-reader.mjs";
+import createTableWriter from "./sqlite/table-writer.mjs";
+import transaction from "./sqlite/transaction.mjs";
 
-export async function importSqlite(file, tables, deps = {}) {
+export default async function importSqlite(file, tables, deps = {}) {
   const Database = deps.DatabaseSync ?? DatabaseSync;
   const database = new Database(file);
   await transaction(database, async () => {

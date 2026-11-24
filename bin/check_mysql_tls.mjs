@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
-import { config } from "../src/config.mjs";
+import config from "../src/config.mjs";
 import { db, dumpTable } from "../src/mysql.mjs";
 
 const settings = config();

@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { quoteIdentifier } = await import("../../src/sqlite/identifier.mjs");
+const quoteIdentifier = (await import("../../src/sqlite/identifier.mjs")).default;
 
 test("quotes safe table and column identifiers", () => {
   expect(quoteIdentifier("APT")).toBe('"APT"');

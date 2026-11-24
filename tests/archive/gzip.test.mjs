@@ -8,7 +8,7 @@ import {
 } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { gzipFile } = await import("../../src/archive/gzip.mjs");
+const gzipFile = (await import("../../src/archive/gzip.mjs")).default;
 
 test("gzipFile compresses a file and removes partial output after failure", async () => {
   const root = makeDirectory("gzip");

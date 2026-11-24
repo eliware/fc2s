@@ -1,6 +1,6 @@
 import { dateDependencies } from "./date-dependencies.mjs";
 
-export function createProcess(processDate, defaults) {
+export default function createProcess(processDate, defaults) {
   return async function process(mode = "current", overrides = {}, dependencies = {}) {
     if (!["current", "latest", "all"].includes(mode)) {
       throw new Error(`Unsupported process mode: ${mode}`);

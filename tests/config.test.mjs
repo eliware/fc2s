@@ -1,4 +1,4 @@
-import { config } from "../src/config.mjs";
+import config from "../src/config.mjs";
 
 test("config accepts overrides", () => {
   expect(config({ driver: "mysql", host: "h", user: "u", password: "p", port: 3307 }).port).toBe(

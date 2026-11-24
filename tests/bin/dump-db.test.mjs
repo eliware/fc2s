@@ -9,7 +9,7 @@ import {
 import path from "node:path";
 
 await mockEffects();
-const { dumpDatabase } = await import("../../src/bin/dump-db.mjs");
+const dumpDatabase = (await import("../../src/bin/dump-db.mjs")).default;
 const { runDump } = await import("../../bin/dump_db.mjs");
 
 test("dumpDatabase rejects a missing or unsafe name", async () => {

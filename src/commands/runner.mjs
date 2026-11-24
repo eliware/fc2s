@@ -1,20 +1,7 @@
 import { spawn as defaultSpawn } from "node:child_process";
+import waitForExit from "./wait-for-exit.mjs";
 
-export function waitForExit(child, failureMessage = (code) => `command failed: ${code}`) {
-  let errorOutput = "";
-  child.stderr?.on("data", (chunk) => {
-    errorOutput += chunk;
-  });
-  return new Promise((resolve, reject) => {
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code) reject(new Error(errorOutput || failureMessage(code)));
-      else resolve();
-    });
-  });
-}
-
-export function run(command, args, options = {}, deps = {}) {
+export default function run(command, args, options = {}, deps = {}) {
   const spawn = deps.spawn ?? defaultSpawn;
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, options);

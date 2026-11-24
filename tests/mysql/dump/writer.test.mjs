@@ -6,7 +6,7 @@ import {
 } from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { writeDump } = await import("../../../src/mysql/dump/writer.mjs");
+const writeDump = (await import("../../../src/mysql/dump/writer.mjs")).default;
 
 test("writeDump streams child output to the requested file", async () => {
   const stream = {};

@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { sqlColumn } = await import("../../src/schema/column-identifier.mjs");
+const sqlColumn = (await import("../../src/schema/column-identifier.mjs")).default;
 
 test("SQL column identifier trims CSV punctuation and quotes names", () => {
   expect(sqlColumn(" ID, ")).toBe("`ID`");

@@ -1,7 +1,7 @@
 import { mockEffects } from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { listTables } = await import("../../../src/mysql/table/list.mjs");
+const listTables = (await import("../../../src/mysql/table/list.mjs")).default;
 
 test("listTables queries and closes the configured database connection", async () => {
   const calls = [];

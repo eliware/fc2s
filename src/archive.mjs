@@ -1,15 +1,5 @@
-import { gzipFile as compressFile } from "./archive/gzip.mjs";
-import { tarGz as createTarGz } from "./archive/tar.mjs";
-import { atomicArchive as createAtomicArchive } from "./archive/atomic.mjs";
+import atomicArchive from "./archive/atomic.mjs";
+import gzipFile from "./archive/gzip.mjs";
+import tarGz from "./archive/tar.mjs";
 
-export function gzipFile(input, output) {
-  return compressFile(input, output);
-}
-
-export function tarGz(output, dir, root, deps) {
-  return createTarGz(output, dir, root, deps);
-}
-
-export function atomicArchive(output, create, deps) {
-  return createAtomicArchive(output, create, deps);
-}
+export { atomicArchive, gzipFile, tarGz };

@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 import { createReadStream, readFileSync } from "node:fs";
 
-export function db(config, deps = {}) {
+export default function db(config, deps = {}) {
   const client = deps.mysql ?? mysql;
   const streamFactory = deps.createReadStream ?? createReadStream;
   const readFile = deps.readFileSync ?? readFileSync;

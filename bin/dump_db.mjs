@@ -1,5 +1,5 @@
 import { pathToFileURL } from "node:url";
-import { dumpDatabase } from "../src/bin/dump-db.mjs";
+import dumpDatabase from "../src/bin/dump-db.mjs";
 
 export async function runDump(dbName, deps = {}) {
   try {

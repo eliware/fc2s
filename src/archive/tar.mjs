@@ -1,7 +1,7 @@
 import path from "node:path";
 import { spawn as defaultSpawn } from "node:child_process";
 
-export function tarGz(output, dir, root = path.basename(path.resolve(dir)), deps = {}) {
+export default function tarGz(output, dir, root = path.basename(path.resolve(dir)), deps = {}) {
   const spawn = deps.spawn ?? defaultSpawn;
   return new Promise((resolve, reject) => {
     const parent = path.dirname(path.resolve(dir));

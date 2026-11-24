@@ -1,7 +1,7 @@
 import { mockEffects, putFile } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { db } = await import("../../src/mysql/connection.mjs");
+const db = (await import("../../src/mysql/connection.mjs")).default;
 
 test("db uses injected mysql client and stream factory", () => {
   const connection = {};

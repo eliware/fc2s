@@ -1,9 +1,7 @@
-import { identifier } from "./identifier.mjs";
-import { sqlColumn } from "./column-identifier.mjs";
+import identifier from "./identifier.mjs";
+import sqlColumn from "./column-identifier.mjs";
 
-export { identifier } from "./identifier.mjs";
-
-export function buildTable(table, csv, rows) {
+export default function buildTable(table, csv, rows) {
   const columns = rows.map((row) => {
     const type =
       row[3] === "VARCHAR"

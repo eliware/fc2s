@@ -1,7 +1,7 @@
 import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { cleanupProcess } = await import("../../src/process/cleanup.mjs");
+const cleanupProcess = (await import("../../src/process/cleanup.mjs")).default;
 
 test("cleanup removes work and staging directories after archiving", async () => {
   const removed = [];

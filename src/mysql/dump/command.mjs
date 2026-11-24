@@ -1,6 +1,6 @@
-import { validateIdentifier } from "../../schema/identifier.mjs";
+import validateIdentifier from "../../schema/validate-identifier.mjs";
 
-export function dumpCommand(config, database, table) {
+export default function dumpCommand(config, database, table) {
   validateIdentifier(table);
   return {
     command: "mysqldump",

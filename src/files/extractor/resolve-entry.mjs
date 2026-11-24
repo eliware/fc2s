@@ -1,0 +1,10 @@
+import path from "node:path";
+
+export default function resolveEntry(output, entryName) {
+  const root = path.resolve(output);
+  const target = path.resolve(output, entryName);
+  if (target !== root && !target.startsWith(`${root}${path.sep}`)) {
+    throw new Error("Unsafe ZIP path");
+  }
+  return target;
+}

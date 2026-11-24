@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 import { fileExists, getFile, mockEffects } from "../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const { download } = await import("../../src/files/transfer.mjs");
+const download = (await import("../../src/files/transfer.mjs")).default;
 const facade = await import("../../src/files.mjs");
 
 test("download rejects HTTP errors", async () => {
