@@ -2,13 +2,24 @@
 
 ## 15.2.0 — 2026-11-24
 
+### Added
+
+- Add a NAS deployment target to the Eliware Knit configuration.
+- Add package subpath exports for the archive, file, and MySQL modules.
+
 ### Changed
 
-- Set the FC2S package version to 15.2.0.
-- Update Eliware Test to 15.2.0 and refresh the dependency lockfile.
-- Expose the archive, file, and MySQL modules through package exports.
-- Expand end-user guidance for setup, configuration, imports, and output files.
-- Refresh the lockfile with the latest compatible transitive package versions.
+- Set the FC2S package version to 15.2.0 and update Eliware Test to 15.2.0.
+- Refresh the package lockfile with current compatible dependency versions.
+- Refactor implementation modules to use one default export and private helpers.
+- Separate download progress, schema column mapping, and SQLite table definition modules.
+- Expand setup, configuration, command, output, and troubleshooting guidance.
+- Describe SQLite and MySQL outputs as compressed archives in `.env.example`.
+- Ignore environment files while allowing `.env.example` files.
+
+### Fixed
+
+- Report cleanup failures together with the import failure.
 
 ## 15.0.1 — 2026-10-28
 
