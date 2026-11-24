@@ -1,7 +1,7 @@
-import { mockEffects } from "../../test-fixtures/mock-effects.mjs";
+import { mockEffects } from "../../../test-fixtures/mock-effects.mjs";
 
 await mockEffects();
-const createTableWriter = (await import("../../src/sqlite/table-writer.mjs")).default;
+const createTableWriter = (await import("../../../src/sqlite/table/writer.mjs")).default;
 
 test("table writer creates a schema and prepares the insert statement", () => {
   const calls = [];

@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import readCsvRows from "./sqlite/csv-reader.mjs";
-import createTableWriter from "./sqlite/table-writer.mjs";
+import createTableWriter from "./sqlite/table/writer.mjs";
 import transaction from "./sqlite/transaction.mjs";
 
 export default async function importSqlite(file, tables, deps = {}) {
