@@ -11,7 +11,7 @@ export default async function download(url, file) {
     try {
       await pipeline(response.body, createProgressMeter(file), createWriteStream(file));
     } catch (error) {
-      await cleanupPartialFile(file);
+      await cleanupPartialFile(file, error);
       throw error;
     }
   });

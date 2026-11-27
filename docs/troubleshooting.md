@@ -28,7 +28,7 @@ Read the command output first. To see more, run the date-specific command with `
 
 **TLS certificate or host-name error** — Set `MYSQL_SSL_CA` to a readable PEM bundle that trusts the server certificate. Connect with a host name listed in that certificate. FC2S rejects invalid CA chains and host-name mismatches. Remove `MYSQL_SSL_CA` only if the server permits connections without TLS.
 
-**`mysqldump` cannot start** — Install MySQL command-line tools and make sure `mysqldump` is on `PATH`. `npm ci` does not install this system command.
+**`mariadb-dump` cannot start** — Install MariaDB client tools and make sure `mariadb-dump` is on `PATH`. `npm ci` does not install this system command.
 
 **`tar` cannot start** — Install a compatible `tar` command and make sure it is on `PATH`. On Windows, use a compatible `tar.exe`.
 

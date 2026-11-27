@@ -26,7 +26,7 @@ FC2S imports FAA NASR CSV datasets into MySQL or SQLite and writes compressed ex
 
 ## Requirements
 
-Use Node.js 26 or later and npm 12 or later. MySQL imports require a MySQL-compatible server, `mysqldump`, and `tar`. SQLite uses Node.js built-in `node:sqlite`.
+Use Node.js 26 or later and npm 12 or later. MySQL imports require a MySQL-compatible server, `mariadb-dump`, and `tar`. SQLite uses Node.js built-in `node:sqlite`.
 
 ## Setup
 

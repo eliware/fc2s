@@ -6,7 +6,7 @@ FC2S requires Node.js 26 or newer and npm 12 or newer. Run commands from the rep
 
 FC2S requires network access to the FAA NASR subscription page and ZIP archive host. The host requires writable temporary storage for downloads and extracted CSV files. Keep sufficient storage capacity for database files and compressed archives.
 
-MySQL imports require a reachable MySQL-compatible server, `mysqldump`, and `tar` on `PATH`. On Windows, add a compatible `tar.exe` to `PATH`. The MySQL server must allow `LOAD DATA LOCAL INFILE`. The account must have permission to create and drop databases, create tables, load rows, list tables, and dump table contents.
+MySQL imports require a reachable MySQL-compatible server, `mariadb-dump`, and `tar` on `PATH`. On Windows, add a compatible `tar.exe` to `PATH`. The MySQL server must allow `LOAD DATA LOCAL INFILE`. The account must have permission to create and drop databases, create tables, load rows, list tables, and dump table contents.
 
 SQLite imports run locally through Node.js built-in `node:sqlite`. They do not require a MySQL server or MySQL credentials.
 
@@ -22,7 +22,7 @@ FC2S reads FAA release labels, sorts their dates newest first, downloads the sel
 
 `latest` selects the newest listed date. `current` selects the second newest date, or the only available date. `all` imports each listed date in sequence from oldest to newest. The date command imports the ISO date that the user supplies.
 
-MySQL imports drop and recreate the date-named database. They create tables, load CSV rows, dump each table with `mysqldump`, and write a `.sql.tar.gz` archive.
+MySQL imports drop and recreate the date-named database. They create tables, load CSV rows, dump each table with `mariadb-dump`, and write a `.sql.tar.gz` archive.
 
 SQLite imports create text columns and load CSV rows in a transaction. They gzip the resulting database as a `.sqlite.gz` archive. Text columns preserve source values such as leading zeros and decimal strings.
 

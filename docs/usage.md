@@ -51,7 +51,7 @@ EXPORT_DIR=./exports
 # MYSQL_SSL_CA=/path/to/ca-chain.pem
 ```
 
-When `MYSQL_SSL_CA` has a path, FC2S enables TLS and verifies the CA chain and server host name for MySQL connections and `mysqldump`. Use a host name that appears in the server certificate. Keep the value unset when the server allows connections without TLS.
+When `MYSQL_SSL_CA` has a path, FC2S enables TLS and verifies the CA chain and server host name for MySQL connections and `mariadb-dump`. Use a host name that appears in the server certificate. Keep the value unset when the server allows connections without TLS.
 
 ## Select a dataset
 
@@ -121,11 +121,11 @@ The check rejects an invalid CA and a host name that does not match the certific
 
 ## MySQL requirements
 
-MySQL imports require a reachable MySQL-compatible server, `mysqldump`, and `tar` on `PATH`. The database account must have permission to create and drop databases, create tables, load data, list tables, and dump table contents.
+MySQL imports require a reachable MySQL-compatible server, `mariadb-dump`, and `tar` on `PATH`. The database account must have permission to create and drop databases, create tables, load data, list tables, and dump table contents.
 
 The server must allow `LOAD DATA LOCAL INFILE`. MariaDB commonly requires `local_infile=ON`. FC2S streams CSV data from the client host, so the CSV files do not require storage on the database server.
 
-FC2S uses TLS only when `MYSQL_SSL_CA` is set. It verifies the CA chain and server host name for database connections and `mysqldump`. Keep the variable unset when the server permits connections without TLS.
+FC2S uses TLS only when `MYSQL_SSL_CA` is set. It verifies the CA chain and server host name for database connections and `mariadb-dump`. Keep the variable unset when the server permits connections without TLS.
 
 ## Diagnostics
 
