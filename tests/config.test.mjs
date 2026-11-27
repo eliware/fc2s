@@ -36,6 +36,7 @@ test("config uses environment values and fallback defaults", () => {
     "EXPORT_DIR",
   ])
     delete process.env[key];
+  process.env.DB_DRIVER = "";
   expect(config({ host: "h", user: "u", password: "p" })).toMatchObject({
     driver: "mysql",
     port: 3306,

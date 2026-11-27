@@ -133,6 +133,29 @@ test("dumpTable kills the child and removes partial output when writing fails", 
   removeTree(root);
 });
 
+test("dumpTable preserves process failure details when writing fails", async () => {
+  const root = makeDirectory("mysql-process-and-write-failure");
+  const file = `${root}/partial.sql`;
+  let failure;
+  try {
+    await dumpTable({ host: "h", port: 3306, user: "u", password: "p" }, "db", "t", file, {
+      spawn: () => child({ error: "dump failed", code: 3 }),
+      pipeline: async () => {
+        throw new Error("disk full");
+      },
+      createWriteStream: () => ({}),
+    });
+  } catch (error) {
+    failure = error;
+  }
+  expect(failure).toBeInstanceOf(AggregateError);
+  expect(failure.errors.map((error) => error.message)).toEqual(
+    expect.arrayContaining(["disk full", "dump failed"]),
+  );
+  expect(fileExists(file)).toBe(false);
+  removeTree(root);
+});
+
 test("dumpTable handles a process spawn error and removes partial output", async () => {
   const root = makeDirectory("mysql-spawn-failure");
   const file = `${root}/partial.sql`;

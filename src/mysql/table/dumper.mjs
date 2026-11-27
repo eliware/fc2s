@@ -36,8 +36,17 @@ export default async function dumpTable(config, database, table, file, deps = {}
       await Promise.all([exited, writing]);
     } catch (error) {
       child.kill();
-      await Promise.allSettled([exited, writing]);
+      const results = await Promise.allSettled([exited, writing]);
       await unlink(file).catch(() => {});
+      const errors = results
+        .filter((result) => result.status === "rejected")
+        .map((result) => result.reason)
+        .filter((failure) => failure !== error);
+      if (errors.length) {
+        throw new AggregateError([error, ...errors], `Dump and output failed: ${error.message}`, {
+          cause: error,
+        });
+      }
       throw error;
     }
   } finally {

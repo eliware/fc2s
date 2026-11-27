@@ -1,6 +1,7 @@
 import validateIdentifier from "../../schema/validate-identifier.mjs";
 
 export default function dumpCommand(config, database, table, credentialsFile) {
+  validateIdentifier(database);
   validateIdentifier(table);
   return {
     command: "mariadb-dump",

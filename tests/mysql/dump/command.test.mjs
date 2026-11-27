@@ -29,3 +29,9 @@ test("dumpCommand rejects unsafe table identifiers", () => {
     dumpCommand({ host: "h", port: 1, user: "u" }, "d", "bad-name", "/tmp/client.cnf"),
   ).toThrow("Unsafe identifier: bad-name");
 });
+
+test("dumpCommand rejects unsafe database identifiers", () => {
+  expect(() =>
+    dumpCommand({ host: "h", port: 1, user: "u" }, "bad-name", "table", "/tmp/client.cnf"),
+  ).toThrow("Unsafe identifier: bad-name");
+});

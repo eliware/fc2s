@@ -3,8 +3,7 @@ import loadEnvironment from "./config/environment.mjs";
 import validateConfig from "./config/validator.mjs";
 
 export default function config(overrides = {}) {
-  loadDotenv();
-  const env = loadEnvironment();
+  const env = { ...loadDotenv(), ...loadEnvironment() };
   const values = {
     driver: env.DB_DRIVER || "mysql",
     host: env.MYSQL_HOSTNAME,
