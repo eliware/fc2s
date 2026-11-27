@@ -58,7 +58,7 @@ test("dumpTable uses injected process and pipeline", async () => {
   expect(calls[0].args).not.toContain("p");
   expect(calls[0].process.input).toBe("p\n");
   expect(calls[0].args).toContain("table");
-  expect(calls[0].args).toContain("--ssl-mode=VERIFY_IDENTITY");
+  expect(calls[0].args).toContain("--ssl-verify-server-cert");
   expect(calls[0].args).toContain("/ca.pem");
 });
 
@@ -72,7 +72,7 @@ test("mysql facade delegates table dumping", async () => {
     pipeline: async () => {},
     createWriteStream: () => ({}),
   });
-  expect(command).toBe("mysqldump");
+  expect(command).toBe("mariadb-dump");
 });
 
 test("dumpTable keeps TLS optional when no CA is configured", async () => {
@@ -85,7 +85,7 @@ test("dumpTable keeps TLS optional when no CA is configured", async () => {
     pipeline: async () => {},
     createWriteStream: () => ({}),
   });
-  expect(args).not.toContain("--ssl-mode=VERIFY_IDENTITY");
+  expect(args).not.toContain("--ssl-verify-server-cert");
 });
 
 test("dumpTable reports injected command failure", async () => {
@@ -166,7 +166,7 @@ test("dumpTable uses fallback error when stderr is empty", async () => {
       pipeline: async () => {},
       createWriteStream: () => ({}),
     }),
-  ).rejects.toThrow("mysqldump failed: 3");
+  ).rejects.toThrow("mariadb-dump failed: 3");
 });
 
 test("dumpTable uses default pipeline and write stream", async () => {

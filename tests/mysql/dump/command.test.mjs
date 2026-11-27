@@ -9,10 +9,10 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
     "database",
     "table",
   );
-  expect(command).toBe("mysqldump");
+  expect(command).toBe("mariadb-dump");
   expect(args).toContain("--password");
   expect(args).not.toContain("secret");
-  expect(args).toContain("--ssl-mode=VERIFY_IDENTITY");
+  expect(args).toContain("--ssl-verify-server-cert");
   expect(args).toContain("/ca.pem");
   expect(options).toEqual({ stdio: ["pipe", "pipe", "pipe"] });
 });
@@ -20,7 +20,7 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
 test("dumpCommand omits TLS options without a CA", () => {
   const args = dumpCommand({ host: "h", port: 1, user: "u" }, "d", "t").args;
   expect(args).not.toContain("--ssl-ca");
-  expect(args).not.toContain("--ssl-mode=VERIFY_IDENTITY");
+  expect(args).not.toContain("--ssl-verify-server-cert");
 });
 
 test("dumpCommand rejects unsafe table identifiers", () => {

@@ -3,7 +3,7 @@ import validateIdentifier from "../../schema/validate-identifier.mjs";
 export default function dumpCommand(config, database, table) {
   validateIdentifier(table);
   return {
-    command: "mysqldump",
+    command: "mariadb-dump",
     args: [
       "--no-defaults",
       "--password",
@@ -15,7 +15,7 @@ export default function dumpCommand(config, database, table) {
       String(config.port),
       "--user",
       config.user,
-      ...(config.sslCa ? ["--ssl-ca", config.sslCa, "--ssl-mode=VERIFY_IDENTITY"] : []),
+      ...(config.sslCa ? ["--ssl-ca", config.sslCa, "--ssl-verify-server-cert"] : []),
       database,
       table,
     ],

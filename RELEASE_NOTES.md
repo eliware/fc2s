@@ -20,6 +20,7 @@
 ### Fixed
 
 - Report cleanup failures together with the import failure.
+- Use the MariaDB dump client with its verified TLS option for MySQL exports.
 
 ## 15.0.1 — 2026-10-28
 
