@@ -4,9 +4,17 @@
 
 ### Changed
 
-- Use `mariadb-dump` with MariaDB's verified TLS option.
-- Store dump credentials in a temporary option file to prevent terminal prompts.
-- Refresh compatible dependency versions.
+- Use `mariadb-dump` with verified TLS and a temporary credentials file for MySQL exports.
+- Refresh compatible dependencies for package version 15.2.1.
+- Keep database host names and usernames out of verbose configuration logs.
+- Load `.env` settings from the current working directory without changing `process.env`.
+- Split configuration loading, schema building, column normalization, and download cleanup into focused modules.
+- Require `mariadb-dump` and update MySQL setup guidance.
+
+### Fixed
+
+- Preserve download and dump errors when cleanup or output writing also fails.
+- Validate database names before passing them to `mariadb-dump`.
 
 ## 15.2.0 — 2026-11-24
 
