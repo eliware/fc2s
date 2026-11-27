@@ -1,7 +1,7 @@
 import { createWriteStream } from "node:fs";
-import { rm } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import step from "../debug/step.mjs";
+import cleanupPartialFile from "./transfer/cleanup.mjs";
 import createProgressMeter from "./transfer/progress.mjs";
 import request from "./request.mjs";
 
@@ -11,7 +11,7 @@ export default async function download(url, file) {
     try {
       await pipeline(response.body, createProgressMeter(file), createWriteStream(file));
     } catch (error) {
-      await rm(file, { force: true });
+      await cleanupPartialFile(file);
       throw error;
     }
   });
