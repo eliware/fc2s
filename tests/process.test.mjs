@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import path from "node:path";
 import {
   fileExists,
@@ -87,6 +88,42 @@ test("processDate selects SQLite import, archives it, and removes staging", asyn
   expect(getFile(archive, "utf8")).toBe("SQLite database");
   expect(fileExists(path.join(exportDir, "P_2025_01_02"))).toBe(false);
   removeTree(root);
+});
+
+test("processDate verbose config logs omit the database host and username", async () => {
+  const root = makeDirectory("process-private-config");
+  const oldVerbose = process.env.FC2S_VERBOSE;
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  process.env.FC2S_VERBOSE = "1";
+  const dependencies = {
+    config: () => ({
+      driver: "sqlite",
+      host: "private-db.example",
+      user: "private-user",
+      prefix: "P_",
+      exportDir: root,
+    }),
+    tempDir: async () => makeDirectory("process-private-work"),
+    mkdir: async () => {},
+    rm: async () => {},
+    download: async () => {},
+    extract: async () => {},
+    schema: async () => [],
+    importSqlite: async (file) => putFile(file, "database"),
+    gzipFile: async (input, output) => putFile(output, getFile(input)),
+    stat: async (file) => fileInfo(file),
+  };
+  try {
+    await processDate("2025-01-02", {}, dependencies);
+    const output = error.mock.calls.flat().join(" ");
+    expect(output).not.toContain("private-db.example");
+    expect(output).not.toContain("private-user");
+  } finally {
+    if (oldVerbose === undefined) delete process.env.FC2S_VERBOSE;
+    else process.env.FC2S_VERBOSE = oldVerbose;
+    error.mockRestore();
+    removeTree(root);
+  }
 });
 
 test("processDate applies default overrides with injected dependencies", async () => {

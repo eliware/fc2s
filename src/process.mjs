@@ -26,9 +26,7 @@ export default async function processDate(date, overrides = {}, dependencies = {
   } = d;
   log("processDate config", {
     date,
-    host: c.host,
     port: c.port,
-    user: c.user,
     exportDir: c.exportDir,
     prefix: c.prefix,
   });
