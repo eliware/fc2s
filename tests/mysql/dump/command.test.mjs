@@ -8,9 +8,10 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
     { host: "host", port: 3306, user: "user", password: "secret", sslCa: "/ca.pem" },
     "database",
     "table",
+    "/tmp/client.cnf",
   );
   expect(command).toBe("mariadb-dump");
-  expect(args).toContain("--password");
+  expect(args[0]).toBe("--defaults-file=/tmp/client.cnf");
   expect(args).not.toContain("secret");
   expect(args).toContain("--ssl-verify-server-cert");
   expect(args).toContain("/ca.pem");
@@ -18,13 +19,13 @@ test("dumpCommand builds arguments and configures optional verified TLS", () => 
 });
 
 test("dumpCommand omits TLS options without a CA", () => {
-  const args = dumpCommand({ host: "h", port: 1, user: "u" }, "d", "t").args;
+  const args = dumpCommand({ host: "h", port: 1, user: "u" }, "d", "t", "/tmp/client.cnf").args;
   expect(args).not.toContain("--ssl-ca");
   expect(args).not.toContain("--ssl-verify-server-cert");
 });
 
 test("dumpCommand rejects unsafe table identifiers", () => {
-  expect(() => dumpCommand({ host: "h", port: 1, user: "u" }, "d", "bad-name")).toThrow(
-    "Unsafe identifier: bad-name",
-  );
+  expect(() =>
+    dumpCommand({ host: "h", port: 1, user: "u" }, "d", "bad-name", "/tmp/client.cnf"),
+  ).toThrow("Unsafe identifier: bad-name");
 });

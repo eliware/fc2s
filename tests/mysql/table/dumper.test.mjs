@@ -1,6 +1,7 @@
 import { EventEmitter } from "node:events";
 import {
   getFile,
+  fileInfo,
   makeDirectory,
   mockEffects,
   putFile,
@@ -52,14 +53,14 @@ test("dumpTable uses injected process and pipeline", async () => {
       createWriteStream: () => stream,
     },
   );
-  expect(calls[0].args).not.toContain("--password=p");
-  expect(calls[0].args[0]).toBe("--no-defaults");
-  expect(calls[0].args).toContain("--password");
+  expect(calls[0].args[0]).toContain("--defaults-file=");
+  expect(calls[0].args[0]).toContain("fc2s-mariadb-");
   expect(calls[0].args).not.toContain("p");
-  expect(calls[0].process.input).toBe("p\n");
+  expect(calls[0].process.input).toBeUndefined();
   expect(calls[0].args).toContain("table");
   expect(calls[0].args).toContain("--ssl-verify-server-cert");
   expect(calls[0].args).toContain("/ca.pem");
+  expect(fileExists(calls[0].args[0].slice("--defaults-file=".length))).toBe(false);
 });
 
 test("mysql facade delegates table dumping", async () => {
@@ -157,6 +158,30 @@ test("dumpTable handles a process spawn error and removes partial output", async
   ).rejects.toThrow("spawn failed");
   expect(fileExists(file)).toBe(false);
   removeTree(root);
+});
+
+test("dumpTable writes and removes an option file for the password", async () => {
+  let args;
+  await dumpTable(
+    { host: "h", port: 3306, user: "u", password: 'p\\a"ss' },
+    "db",
+    "table",
+    "x.sql",
+    {
+      spawn: (command, receivedArgs) => {
+        args = receivedArgs;
+        const credentialsFile = receivedArgs[0].slice("--defaults-file=".length);
+        expect(getFile(credentialsFile, "utf8")).toBe('[client]\npassword="p\\\\a\\"ss"\n');
+        expect(fileInfo(credentialsFile).mode & 0o777).toBe(0o600);
+        const process = child();
+        return process;
+      },
+      pipeline: async () => {},
+      createWriteStream: () => ({}),
+    },
+  );
+  const credentialsFile = args[0].slice("--defaults-file=".length);
+  expect(fileExists(credentialsFile)).toBe(false);
 });
 
 test("dumpTable uses fallback error when stderr is empty", async () => {
