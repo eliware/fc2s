@@ -1,7 +1,9 @@
+import loadDotenv from "./config/dotenv-loader.mjs";
 import loadEnvironment from "./config/environment.mjs";
 import validateConfig from "./config/validator.mjs";
 
 export default function config(overrides = {}) {
+  loadDotenv();
   const env = loadEnvironment();
   const values = {
     driver: env.DB_DRIVER || "mysql",

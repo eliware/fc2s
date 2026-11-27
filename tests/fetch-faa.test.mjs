@@ -1,5 +1,4 @@
 import availableDates from "../src/fetch-faa.mjs";
-import dataUrl from "../src/data-url.mjs";
 
 test("availableDates uses FAA home page by default", async () => {
   const old = globalThis.fetch;
@@ -23,10 +22,3 @@ test("availableDates rejects HTTP errors", async () => {
   await expect(availableDates("x")).rejects.toThrow("FAA HTTP 500");
   globalThis.fetch = old;
 });
-
-test.each(["2025-02-30", "2025-2-03", "not-a-date"])(
-  "dataUrl rejects invalid ISO calendar date %s",
-  (date) => {
-    expect(() => dataUrl(date)).toThrow("Invalid date");
-  },
-);

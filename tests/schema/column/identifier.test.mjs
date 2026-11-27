@@ -1,0 +1,12 @@
+import { mockEffects } from "../../../test-fixtures/mock-effects.mjs";
+
+await mockEffects();
+const sqlColumn = (await import("../../../src/schema/column/identifier.mjs")).default;
+
+test("SQL column identifier quotes a validated name", () => {
+  expect(sqlColumn("ID")).toBe("`ID`");
+});
+
+test("SQL column identifier rejects unsafe names", () => {
+  expect(() => sqlColumn("bad-name")).toThrow("Unsafe column name");
+});

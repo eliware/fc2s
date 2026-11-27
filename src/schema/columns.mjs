@@ -1,7 +1,9 @@
-import sqlColumn from "./column-identifier.mjs";
+import sqlColumn from "./column/identifier.mjs";
+import columnName from "./column/name.mjs";
 
 export default function buildColumns(rows) {
   return rows.map((row) => {
+    const name = columnName(row[1]);
     const type =
       row[3] === "VARCHAR"
         ? `VARCHAR(${Number(row[2]) || 255})`
@@ -9,8 +11,8 @@ export default function buildColumns(rows) {
           ? "DECIMAL(30,10)"
           : "TEXT";
     return {
-      name: row[1].trim().replace(/,+$/, "").trim(),
-      mysqlName: sqlColumn(row[1]),
+      name,
+      mysqlName: sqlColumn(name),
       mysqlType: type,
       nullable: row[4] === "Yes",
     };
