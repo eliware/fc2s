@@ -1,6 +1,6 @@
 {
   "name": "@eliware/fc2s",
-  "version": "15.2.0",
+  "version": "15.2.1",
   "type": "module",
   "description": "Node.js ESM importer for FAA NASR CSV datasets with MySQL and SQLite exports.",
   "keywords": [

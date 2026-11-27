@@ -1,5 +1,13 @@
 # Release Notes
 
+## 15.2.1 — 2026-11-27
+
+### Changed
+
+- Use `mariadb-dump` with MariaDB's verified TLS option.
+- Store dump credentials in a temporary option file to prevent terminal prompts.
+- Refresh compatible dependency versions.
+
 ## 15.2.0 — 2026-11-24
 
 ### Added
@@ -20,7 +28,6 @@
 ### Fixed
 
 - Report cleanup failures together with the import failure.
-- Use the MariaDB dump client with a temporary credentials file for MySQL exports.
 
 ## 15.0.1 — 2026-10-28
 
